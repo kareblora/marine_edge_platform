@@ -3,66 +3,120 @@ from .models import (
     Environment,
     Physiology,
     DiveState,
-    Movement
+    Movement,
+    TelemetryQuality
 )
 
 
 class MarineNormalizer:
 
     @staticmethod
-    def normalize_record(record):
+    def normalize_record(record, device_id, diver_id, dive_id):
 
-        return Telemetry(
-
-            timestamp=record.get("timestamp"),
-
-            environment=Environment(
-                depth_m=record.get("depth"),
-                temperature_c=record.get("temperature"),
-                absolute_pressure_pa=record.get("absolute_pressure")
-            ),
-
-            physiology=Physiology(
-                heart_rate_bpm=record.get("heart_rate")
-            ),
-
-            dive=DiveState(
-                n2_load_percent=record.get("n2_load"),
-                cns_load_percent=record.get("cns_load"),
-                po2=record.get("po2"),
-                time_to_surface_s=record.get("time_to_surface")
-            ),
-
-            movement=Movement(
-                ascent_descent_rate_mps=record.get("ascent_descent_rate")
-            )
+        environment = Environment(
+            depth_m=record.get("depth"),
+            temperature_c=record.get("temperature"),
+            absolute_pressure_pa=record.get("absolute_pressure")
         )
 
-# from .models import Telemetry
+        physiology = Physiology(
+            heart_rate_bpm=record.get("heart_rate")
+        )
 
+        dive = DiveState(
+            n2_load_percent=record.get("n2_load"),
+            cns_load_percent=record.get("cns_load"),
+            po2=record.get("po2"),
+            time_to_surface_s=record.get("time_to_surface")
+        )
 
-# class MarineNormalizer:
+        movement = Movement(
+            ascent_descent_rate_mps=record.get("ascent_descent_rate")
+        )
 
-#     @staticmethod
-#     def normalize_record(record):
+        quality = MarineNormalizer.calculate_quality(
+            environment,
+            physiology,
+            dive,
+            movement
+        )
 
-#         return Telemetry(
-#             timestamp=record.get("timestamp"),
+        return Telemetry(
+            timestamp=record.get("timestamp"),
+            
+            device_id=device_id,
+            diver_id=diver_id,
+            dive_id=dive_id,
 
-#             depth_m=record.get("depth"),
-#             temperature_c=record.get("temperature"),
-#             absolute_pressure_pa=record.get("absolute_pressure"),
+            environment=environment,
+            physiology=physiology,
+            dive=dive,
+            movement=movement,
 
-#             heart_rate_bpm=record.get("heart_rate"),
+            quality=quality
+        )
 
-#             n2_load_percent=record.get("n2_load"),
-#             cns_load_percent=record.get("cns_load"),
+    @staticmethod
+    def calculate_quality(
+        environment,
+        physiology,
+        dive,
+        movement
+    ):
 
-#             po2=record.get("po2"),
+        fields = {
+            "environment.depth_m": environment.depth_m,
+            "environment.temperature_c": environment.temperature_c,
+            "environment.absolute_pressure_pa":
+                environment.absolute_pressure_pa,
 
-#             time_to_surface_s=record.get("time_to_surface"),
+            "physiology.heart_rate_bpm":
+                physiology.heart_rate_bpm,
 
-#             ascent_descent_rate_mps=record.get(
-#                 "ascent_descent_rate"
-#             )
-#         )
+            "dive.n2_load_percent":
+                dive.n2_load_percent,
+
+            "dive.cns_load_percent":
+                dive.cns_load_percent,
+
+            "dive.po2":
+                dive.po2,
+
+            "dive.time_to_surface_s":
+                dive.time_to_surface_s,
+
+            "movement.ascent_descent_rate_mps":
+                movement.ascent_descent_rate_mps
+        }
+
+        total_fields = len(fields)
+
+        missing_fields = [
+            name
+            for name, value in fields.items()
+            if value is None
+        ]
+
+        available_fields = total_fields - len(missing_fields)
+
+        completeness = (
+            available_fields / total_fields
+        ) * 100
+
+        completeness = round(completeness, 1)
+
+        if completeness == 100:
+            status = "COMPLETE"
+
+        elif completeness >= 75:
+            status = "PARTIAL"
+
+        else:
+            status = "DEGRADED"
+
+        return TelemetryQuality(
+            status=status,
+            completeness_percent=completeness,
+            missing_fields=missing_fields
+        )
+

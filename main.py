@@ -5,6 +5,7 @@ from pathlib import Path
 from parser.fit_parser import GarminFitParser
 from parser.normalizer import MarineNormalizer
 from parser.report import DiveReport
+from parser.config import MarineConfig
 
 def format_minutes(seconds):
     
@@ -31,6 +32,21 @@ def main():
         sys.exit(1)
 
     fit_file = Path(sys.argv[1])
+
+    config = MarineConfig("config/config.json")
+
+    device_id = config.get("device_id")
+    diver_id = config.get("diver_id")
+    dive_id = config.get("dive_id")
+        
+    # config_file = Path("config/config.json")
+
+    # with open(config_file) as f:
+    #     config = json.load(f)
+
+    # device_id = config["device_id"]
+    # diver_id = config["diver_id"]
+    # dive_id = config["dive_id"]
 
     if not fit_file.exists():
         print(f"File not found: {fit_file}")
@@ -68,7 +84,7 @@ def main():
 
     for record in records:
 
-        normalized = MarineNormalizer.normalize_record(record)
+        normalized = MarineNormalizer.normalize_record(record,device_id,diver_id,dive_id)
         telemetry.append(normalized.to_dict())
     
     
@@ -249,88 +265,19 @@ def main():
 
     print("=" * 64)
 
-    # print()
-    # print("=" * 50)
-    # print("       MARINE EDGE DIVE TELEMETRY REPORT")
-    # print("=" * 50)
-
-    # print()
-
-    # print("DIVE PROFILE")
-    # print("-" * 50)
-
-    # print(f"Telemetry Records : {report['telemetry_records']}")
-    # print(f"Dive Number      : {report['dive_number']}")
-    # print(f"Average Depth    : {report['average_depth_m']} m")
-    # print(f"Maximum Depth    : {report['maximum_depth_m']} m")
-    # print(f"Bottom Time      : {report['bottom_time_s']} sec")
-    # print(f"Descent Time     : {report['descent_time_s']} sec")
-    # print(f"Ascent Time      : {report['ascent_time_s']} sec")
-
-    # print()
-
-    # print("ENVIRONMENT")
-    # print("-" * 50)
-
-    # environment = report["environment"]
-
-    # print(
-    #     f"Depth Range      : "
-    #     f"{environment['depth_min_m']} - "
-    #     f"{environment['depth_max_m']} m"
-    # )
-
-    # print(
-    #     f"Temperature      : "
-    #     f"{environment['temperature_min_c']} - "
-    #     f"{environment['temperature_max_c']} °C"
-    # )
-
-    # print(
-    #     f"Pressure         : "
-    #     f"{environment['pressure_min_pa']} - "
-    #     f"{environment['pressure_max_pa']} Pa"
-    # )
-
-    # print()
-
-    # print("DIVER TELEMETRY")
-    # print("-" * 50)
-
-    # heart_rate = report["heart_rate"]
-
-    # print(f"Average HR       : {heart_rate['average_bpm']} bpm")
-    # print(f"Minimum HR       : {heart_rate['min_bpm']} bpm")
-    # print(f"Maximum HR       : {heart_rate['max_bpm']} bpm")
-
-    # print()
-
-    # print("EVENTS")
-    # print("-" * 50)
-
-    # print(f"Total Events     : {report['events']}")
-
-    # print()
-    # print("=" * 50)
-    
     output = {
-        "source": {
-            "type": "garmin_fit",
-            "filename": fit_file.name
-        },
+    "schema_version": "1.0",
 
-        "session": session,
+    "source": {
+        "format": "garmin_fit",
+        "file": str(fit_file),
+        "device_id": device_id,
+        "parser": "MarineEdge Garmin FIT Parser"
+    },
 
-        "dive_summary": dive_summary,
+    "telemetry": telemetry
+}
 
-        "dive_settings": dive_settings,
-
-        "dive_gas": dive_gas,
-
-        "events": events,
-
-        "telemetry": telemetry
-    }
 
     output_dir = Path("output")
     output_dir.mkdir(exist_ok=True)

@@ -46,8 +46,6 @@ def main():
         mqtt_config["broker_host"],
         mqtt_config["broker_port"]
     )
-
-    mqtt_publisher.connect()
         
 
     if not fit_file.exists():
@@ -65,6 +63,35 @@ def main():
     dive_gas = parser.get_dive_gas()
     events = parser.get_events()
 
+    telemetry = []
+
+    for record in records:
+
+        normalized = MarineNormalizer.normalize_record(record,device_id,diver_id,dive_id)
+        telemetry.append(normalized.to_dict())
+
+    print("Connecting to MQTT broker...")
+    mqtt_publisher.connect()
+   
+    topic = (
+        f"{mqtt_config['topic_prefix']}/"
+        f"{device_id}/"
+        f"{dive_id}"
+    )
+
+    
+    print("Publishing telemetry...")
+    for data in telemetry:
+        mqtt_publisher.publish(
+            topic,
+            data
+        )   
+        
+    print("Publishing telemetry...")
+    mqtt_publisher.disconnect()
+    
+    print("Disconnecting from MQTT broker...")
+
 # ---------------------------------------------------------
 # DIVE OPERATIONAL REPORT -- SOURCE
 # ---------------------------------------------------------
@@ -80,30 +107,6 @@ def main():
     print("-" * 64)
 
     print(f"File                : {fit_file.name}")
-
-
-    telemetry = []
-
-    for record in records:
-
-        normalized = MarineNormalizer.normalize_record(record,device_id,diver_id,dive_id)
-        telemetry.append(normalized.to_dict())
-   
-    topic = (
-        f"{mqtt_config['topic_prefix']}/"
-        f"{device_id}/"
-        f"{dive_id}"
-    )
-
-    
-    for data in telemetry:
-        mqtt_publisher.publish(
-            topic,
-            data
-        )   
-        
-    
-    mqtt_publisher.disconnect()
 
     report_generator = DiveReport(
         session=session,

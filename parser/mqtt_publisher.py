@@ -9,7 +9,8 @@ class MQTTPublisher:
         self.broker_port = broker_port
 
         self.client = mqtt.Client(
-            mqtt.CallbackAPIVersion.VERSION2
+            # mqtt.CallbackAPIVersion.VERSION2
+            callback_api_version=mqtt.CallbackAPIVersion.VERSION2
         )
 
     def connect(self):
@@ -34,3 +35,4 @@ class MQTTPublisher:
 
     def disconnect(self):
         self.client.disconnect()
+        self.client.loop_stop()

@@ -46,8 +46,6 @@ def main():
         mqtt_config["broker_host"],
         mqtt_config["broker_port"]
     )
-
-    mqtt_publisher.connect()
         
 
     if not fit_file.exists():
@@ -65,6 +63,38 @@ def main():
     dive_gas = parser.get_dive_gas()
     events = parser.get_events()
 
+    normalized_data = [
+        MarineNormalizer.normalize_record(
+            record,
+            device_id,
+            diver_id,
+            dive_id
+        ).to_dict()
+        for record in records
+    ]
+
+    print("Connecting to MQTT broker...")
+    mqtt_publisher.connect()
+   
+    topic = (
+        f"{mqtt_config['topic_prefix']}/"
+        f"{device_id}/"
+        f"{dive_id}"
+    )
+
+    
+    print("Publishing telemetry...")
+    for telemetry in normalized_data:
+        mqtt_publisher.publish(
+            topic,
+            telemetry
+        )   
+        
+    print("Disconnecting from MQTT broker...")
+    mqtt_publisher.disconnect()
+    
+    print("MQTT connection closed.")
+
 # ---------------------------------------------------------
 # DIVE OPERATIONAL REPORT -- SOURCE
 # ---------------------------------------------------------
@@ -81,37 +111,13 @@ def main():
 
     print(f"File                : {fit_file.name}")
 
-
-    telemetry = []
-
-    for record in records:
-
-        normalized = MarineNormalizer.normalize_record(record,device_id,diver_id,dive_id)
-        telemetry.append(normalized.to_dict())
-   
-    topic = (
-        f"{mqtt_config['topic_prefix']}/"
-        f"{device_id}/"
-        f"{dive_id}"
-    )
-
-    
-    for data in telemetry:
-        mqtt_publisher.publish(
-            topic,
-            data
-        )   
-        
-    
-    mqtt_publisher.disconnect()
-
     report_generator = DiveReport(
         session=session,
         dive_summary=dive_summary,
         dive_settings=dive_settings,
         dive_gas=dive_gas,
         events=events,
-        telemetry=telemetry
+        telemetry=normalized_data
     )
 
     report = report_generator.generate()
@@ -292,7 +298,7 @@ def main():
         "parser": "MarineEdge Garmin FIT Parser"
     },
 
-    "telemetry": telemetry
+    "telemetry": normalized_data
 }
 
 

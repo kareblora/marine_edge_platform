@@ -1,5 +1,11 @@
 {
   "device_id": "GARMIN-DIVE-001",
   "diver_id": "DIVER-001",
-  "dive_id": "DIVE-136"
+  "dive_id": "DIVE-136",
+
+  "mqtt": {
+    "broker_host": "localhost",
+    "broker_port": 1883,
+    "topic_prefix": "marine/telemetry"
+  }
 }

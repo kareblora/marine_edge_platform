@@ -6,6 +6,7 @@ from parser.fit_parser import GarminFitParser
 from parser.normalizer import MarineNormalizer
 from parser.report import DiveReport
 from parser.config import MarineConfig
+from parser.mqtt_publisher import MQTTPublisher
 
 def format_minutes(seconds):
     
@@ -38,15 +39,16 @@ def main():
     device_id = config.get("device_id")
     diver_id = config.get("diver_id")
     dive_id = config.get("dive_id")
+
+    mqtt_config = config.get_mqtt_config()
+
+    mqtt_publisher = MQTTPublisher(
+        mqtt_config["broker_host"],
+        mqtt_config["broker_port"]
+    )
+
+    mqtt_publisher.connect()
         
-    # config_file = Path("config/config.json")
-
-    # with open(config_file) as f:
-    #     config = json.load(f)
-
-    # device_id = config["device_id"]
-    # diver_id = config["diver_id"]
-    # dive_id = config["dive_id"]
 
     if not fit_file.exists():
         print(f"File not found: {fit_file}")
@@ -86,8 +88,23 @@ def main():
 
         normalized = MarineNormalizer.normalize_record(record,device_id,diver_id,dive_id)
         telemetry.append(normalized.to_dict())
+   
+    topic = (
+        f"{mqtt_config['topic_prefix']}/"
+        f"{device_id}/"
+        f"{dive_id}"
+    )
+
     
+    for data in telemetry:
+        mqtt_publisher.publish(
+            topic,
+            data
+        )   
+        
     
+    mqtt_publisher.disconnect()
+
     report_generator = DiveReport(
         session=session,
         dive_summary=dive_summary,

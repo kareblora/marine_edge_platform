@@ -44,3 +44,6 @@ class MarineConfig:
 
     def get(self, field):
         return self.config[field]
+
+    def get_mqtt_config(self):
+        return self.config["mqtt"]

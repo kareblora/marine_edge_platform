@@ -84,10 +84,10 @@ def main():
 
     
     print("Publishing telemetry...")
-    for data in telemetry:
+    for telemetry in normalized_data:
         mqtt_publisher.publish(
             topic,
-            data
+            telemetry
         )   
         
     print("Disconnecting from MQTT broker...")

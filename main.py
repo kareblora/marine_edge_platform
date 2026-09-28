@@ -63,12 +63,15 @@ def main():
     dive_gas = parser.get_dive_gas()
     events = parser.get_events()
 
-    telemetry = []
-
-    for record in records:
-
-        normalized = MarineNormalizer.normalize_record(record,device_id,diver_id,dive_id)
-        telemetry.append(normalized.to_dict())
+    normalized_data = [
+        MarineNormalizer.normalize_record(
+            record,
+            device_id,
+            diver_id,
+            dive_id
+        ).to_dict()
+        for record in records
+    ]
 
     print("Connecting to MQTT broker...")
     mqtt_publisher.connect()
@@ -87,10 +90,10 @@ def main():
             data
         )   
         
-    print("Publishing telemetry...")
+    print("Disconnecting from MQTT broker...")
     mqtt_publisher.disconnect()
     
-    print("Disconnecting from MQTT broker...")
+    print("MQTT connection closed.")
 
 # ---------------------------------------------------------
 # DIVE OPERATIONAL REPORT -- SOURCE
@@ -114,7 +117,7 @@ def main():
         dive_settings=dive_settings,
         dive_gas=dive_gas,
         events=events,
-        telemetry=telemetry
+        telemetry=normalized_data
     )
 
     report = report_generator.generate()
@@ -295,7 +298,7 @@ def main():
         "parser": "MarineEdge Garmin FIT Parser"
     },
 
-    "telemetry": telemetry
+    "telemetry": normalized_data
 }
 
 

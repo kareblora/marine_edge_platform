@@ -7,7 +7,7 @@
     "broker_host": "localhost",
     "broker_port": 1883,
     "topic_prefix": "marine/telemetry"
-  }
+  },
 
   "storage": {
     "database": "output/marine_edge.db"

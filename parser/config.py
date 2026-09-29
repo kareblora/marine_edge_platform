@@ -47,3 +47,6 @@ class MarineConfig:
 
     def get_mqtt_config(self):
         return self.config["mqtt"]
+
+    def get_storage_config(self):
+        return self.config["storage"]

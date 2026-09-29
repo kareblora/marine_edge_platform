@@ -5,6 +5,10 @@ sudo apt install python3.12-venv
 sudo apt install git
 sudo apt install sqlite3
 
+# Setting up GIT credentials
+git config --global user.email "kp.reblora@gmail.com"
+git config --global user.name "kevin"
+
 # Installing required python modules
 python3 -m venv .venv
 source .venv/bin/activate

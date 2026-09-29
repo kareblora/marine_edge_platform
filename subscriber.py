@@ -27,4 +27,12 @@ subscriber = MQTTSubscriber(
     storage
 )
 
-subscriber.start()
+try:
+    subscriber.start()
+
+except KeyboardInterrupt:
+    print("Stopping subscriber...")
+
+finally:
+    storage.close()
+    print("Database connection closed.")

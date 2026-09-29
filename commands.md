@@ -3,6 +3,7 @@ sudo apt update
 sudo apt install python3
 sudo apt install python3.12-venv
 sudo apt install git
+sudo apt install sqlite3
 
 # Installing required python modules
 python3 -m venv .venv

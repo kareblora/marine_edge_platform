@@ -4,10 +4,11 @@ import paho.mqtt.client as mqtt
 
 class MQTTSubscriber:
 
-    def __init__(self, broker_host, broker_port, topic):
+    def __init__(self, broker_host, broker_port, topic, storage):
         self.broker_host = broker_host
         self.broker_port = broker_port
         self.topic = topic
+        self.storage = storage
 
         self.client = mqtt.Client(
             callback_api_version=mqtt.CallbackAPIVersion.VERSION2
@@ -15,6 +16,7 @@ class MQTTSubscriber:
 
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
+        self.message_count = 0
 
     def on_connect(self, client, userdata, flags, reason_code, properties):
         print(f"Connected to MQTT broker: {reason_code}")
@@ -31,8 +33,15 @@ class MQTTSubscriber:
             message.payload.decode("utf-8")
         )
 
+        self.storage.save(payload)
+        self.message_count += 1
+
         print(
-            f"Received telemetry: "
+            f"Received message #{self.message_count}"
+        )
+
+        print(
+            f"Stored telemetry: "
             f"{payload.get('timestamp')}"
         )
 

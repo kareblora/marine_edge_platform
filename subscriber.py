@@ -16,9 +16,15 @@ topic = (
     f"{dive_id}"
 )
 
+telemetry_database = config.get_telemetry_database()
+
 storage = TelemetryStorage(
-    "output/marine_edge.db"
+    telemetry_database
 )
+
+# storage = TelemetryStorage(
+#     "output/marine_edge.db"
+# )
 
 subscriber = MQTTSubscriber(
     mqtt_config["broker_host"],

@@ -39,7 +39,7 @@ class TelemetryStorage:
                 dive_id,
                 payload
             )
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?)
             """,
             (
                 telemetry.get("message_id"),

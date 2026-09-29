@@ -41,8 +41,11 @@ def main():
     diver_id = config.get("diver_id")
     dive_id = config.get("dive_id")
     
-    storage_config = config.get_storage_config()
-    database_path = storage_config["database"]
+    #storage_config = config.get_storage_config()
+    #database_path = storage_config["database"]
+    
+    database_path = config.get_publisher_database()
+    
     outbox = TelemetryOutbox(database_path)
         
     #database_path = config.get("storage")["database"]

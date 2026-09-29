@@ -10,6 +10,7 @@
   },
 
   "storage": {
-    "database": "output/marine_edge.db"
+    "publisher_database": "output/publisher.db",
+    "telemetry_database": "output/telemetry.db"
   }
 }

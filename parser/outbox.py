@@ -90,5 +90,23 @@ class TelemetryOutbox:
 
         self.connection.commit()
 
+    def get_pending(self, limit=100):
+        cursor = self.connection.execute(
+            """
+            SELECT
+                message_id,
+                topic,
+                payload,
+                attempts
+            FROM outbox
+            WHERE status = 'PENDING'
+            ORDER BY rowid
+            LIMIT ?
+            """,
+            (limit,)
+        )
+
+        return cursor.fetchall()
+
     def close(self):
         self.connection.close()

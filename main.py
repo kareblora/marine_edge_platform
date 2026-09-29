@@ -81,7 +81,9 @@ def main():
     ]
 
     print("Connecting to MQTT broker...")
-    mqtt_publisher.connect()
+    
+    mqtt_connected = mqtt_publisher.connect()
+    # mqtt_publisher.connect()
    
     topic = (
         f"{mqtt_config['topic_prefix']}/"
@@ -102,21 +104,26 @@ def main():
             telemetry
         )
 
-        success = mqtt_publisher.publish(
-            topic,
-            telemetry
-        )
-
-        if success:
-            outbox.mark_sent(
-                message_id
+        if mqtt_connected:
+            success = mqtt_publisher.publish(
+                topic,
+                telemetry
             )
+
+            if success:
+                outbox.mark_sent(
+                    message_id
+                )
+
+            else:
+                print(
+                    f"Buffered telemetry: {message_id}"
+                )
 
         else:
             print(
-                f"Buffered telemetry: {message_id}"
+                f"MQTT unavailable - buffered: {message_id}"
             )
-
         #mqtt_publisher.publish(
         #    topic,
         #    telemetry

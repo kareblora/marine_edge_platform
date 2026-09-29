@@ -17,6 +17,7 @@ class TelemetryStorage:
         self.connection.execute("""
             CREATE TABLE IF NOT EXISTS telemetry (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                message_id TEXT UNIQUE,
                 timestamp TEXT,
                 device_id TEXT,
                 diver_id TEXT,
@@ -31,6 +32,7 @@ class TelemetryStorage:
         self.connection.execute(
             """
             INSERT INTO telemetry (
+                message_id,
                 timestamp,
                 device_id,
                 diver_id,
@@ -40,6 +42,7 @@ class TelemetryStorage:
             VALUES (?, ?, ?, ?, ?)
             """,
             (
+                telemetry.get("message_id"),
                 telemetry.get("timestamp"),
                 telemetry.get("device_id"),
                 telemetry.get("diver_id"),

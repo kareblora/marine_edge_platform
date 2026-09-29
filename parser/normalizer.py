@@ -1,3 +1,5 @@
+import uuid
+
 from .models import (
     Telemetry,
     Environment,
@@ -13,6 +15,7 @@ class MarineNormalizer:
     @staticmethod
     def normalize_record(record, device_id, diver_id, dive_id):
 
+        message_id = str(uuid.uuid4())
         environment = Environment(
             depth_m=record.get("depth"),
             temperature_c=record.get("temperature"),
@@ -42,6 +45,7 @@ class MarineNormalizer:
         )
 
         return Telemetry(
+            message_id=message_id,
             timestamp=record.get("timestamp"),
             
             device_id=device_id,

@@ -8,9 +8,14 @@ class TelemetryOutbox:
         self.database_path = database_path
 
         self.connection = sqlite3.connect(
-            self.database_path
+            self.database_path,
+            timeout=30
         )
-
+        
+        self.connection.execute(
+            "PRAGMA journal_mode=WAL"
+        )
+            
         self.create_table()
 
     def create_table(self):

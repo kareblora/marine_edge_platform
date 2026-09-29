@@ -8,7 +8,8 @@ class TelemetryStorage:
         self.database_path = database_path
 
         self.connection = sqlite3.connect(
-            self.database_path
+            self.database_path,
+            timeout=30
         )
 
         self.create_table()

@@ -31,7 +31,7 @@ class MQTTPublisher:
             qos=1
         )
 
-        result.wait_for_publish()   
+        result.wait_for_publish(timeout=5)   
 
         return result.rc
 

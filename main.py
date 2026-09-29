@@ -7,6 +7,7 @@ from parser.normalizer import MarineNormalizer
 from parser.report import DiveReport
 from parser.config import MarineConfig
 from parser.mqtt_publisher import MQTTPublisher
+from parser.outbox import TelemetryOutbox
 
 def format_minutes(seconds):
     
@@ -39,6 +40,12 @@ def main():
     device_id = config.get("device_id")
     diver_id = config.get("diver_id")
     dive_id = config.get("dive_id")
+    
+    storage_config = config.get_storage_config()
+    database_path = storage_config["database"]
+    outbox = TelemetryOutbox(database_path)
+        
+    #database_path = config.get("storage")["database"]
 
     mqtt_config = config.get_mqtt_config()
 
@@ -84,11 +91,46 @@ def main():
 
     
     print("Publishing telemetry...")
+    
     for telemetry in normalized_data:
-        mqtt_publisher.publish(
+    
+        message_id = telemetry["message_id"]
+
+        outbox.add(
+            message_id,
             topic,
             telemetry
-        )   
+        )
+
+        success = mqtt_publisher.publish(
+            topic,
+            telemetry
+        )
+
+        if success:
+            outbox.mark_sent(
+                message_id
+            )
+
+        else:
+            print(
+                f"Buffered telemetry: {message_id}"
+            )
+
+        #mqtt_publisher.publish(
+        #    topic,
+        #    telemetry
+        #)
+
+        #outbox.mark_sent(
+        #    message_id
+        #)
+
+    #for telemetry in normalized_data:
+    #    mqtt_publisher.publish(
+    #        topic,
+    #        telemetry
+    #    )   
         
     print("Disconnecting from MQTT broker...")
     mqtt_publisher.disconnect()

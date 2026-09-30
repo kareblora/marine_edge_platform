@@ -1,16 +1,15 @@
 import json
 import time
 
-
 class EdgeSyncAgent:
 
     def __init__(
         self,
-        outbox,
+        replay_worker,
         mqtt_publisher,
         retry_interval=10
     ):
-        self.outbox = outbox
+        self.replay_worker = replay_worker
         self.mqtt_publisher = mqtt_publisher
         self.retry_interval = retry_interval
 
@@ -38,7 +37,8 @@ class EdgeSyncAgent:
 
             print("MQTT connection established.")
 
-            replayed = self.replay_pending()
+            #replayed = self.replay_pending()
+            replayed = self.replay_worker.replay()
 
             self.mqtt_publisher.disconnect()
 

@@ -2,7 +2,7 @@ from parser.config import MarineConfig
 from parser.outbox import TelemetryOutbox
 from parser.mqtt_publisher import MQTTPublisher
 from parser.sync_agent import EdgeSyncAgent
-
+from parser.replay_worker import ReplayWorker
 
 config = MarineConfig(
     "config/config.json"
@@ -27,8 +27,13 @@ publisher = MQTTPublisher(
     mqtt_config["broker_port"]
 )
 
-agent = EdgeSyncAgent(
+replay_worker = ReplayWorker(
     outbox,
+    publisher
+)
+
+agent = EdgeSyncAgent(
+    replay_worker,
     publisher,
     retry_interval
 )

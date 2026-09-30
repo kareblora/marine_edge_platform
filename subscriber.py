@@ -1,7 +1,9 @@
 from parser.mqtt_subscriber import MQTTSubscriber
 from parser.config import MarineConfig
 from parser.storage import TelemetryStorage
+from parser.metrics import start_metrics_server
 
+start_metrics_server(8002)
 
 config = MarineConfig("config/config.json")
 

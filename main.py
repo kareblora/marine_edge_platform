@@ -8,6 +8,7 @@ from parser.report import DiveReport
 from parser.config import MarineConfig
 from parser.mqtt_publisher import MQTTPublisher
 from parser.outbox import TelemetryOutbox
+from parser.metrics import start_metrics_server
 
 def format_minutes(seconds):
     
@@ -34,6 +35,8 @@ def main():
         sys.exit(1)
 
     fit_file = Path(sys.argv[1])
+    
+    start_metrics_server(8001)
 
     config = MarineConfig("config/config.json")
 

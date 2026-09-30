@@ -12,13 +12,14 @@ git config --global user.email "kp.reblora@gmail.com"
 git config --global user.name "kevin"
 git clone https://github.com/kareblora/marine_edge_platform.git
 cd marine_edge_platform
-git checkout mqtt_branch
+git checkout observability
 
 # Installing required python modules
 python3 -m venv .venv
 source .venv/bin/activate
 pip install fitparse
 pip install paho-mqtt
+pip install prometheus-client
 
 # Installing local MQTT broker
 sudo apt install mosquitto mosquitto-clients -y

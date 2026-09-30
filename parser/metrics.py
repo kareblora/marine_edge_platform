@@ -1,4 +1,5 @@
 from prometheus_client import Counter, Gauge, Histogram
+from prometheus_client import start_http_server
 
 
 # MQTT
@@ -81,3 +82,7 @@ telemetry_processing_seconds = Histogram(
     "marine_telemetry_processing_seconds",
     "Time spent processing a telemetry record"
 )
+
+def start_metrics_server(port):
+    start_http_server(port)
+    print(f"Prometheus metrics available on port {port}")

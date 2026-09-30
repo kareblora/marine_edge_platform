@@ -37,7 +37,7 @@ class TelemetryQuality:
 
 @dataclass
 class Telemetry:
-
+    message_id: Optional[str] = None
     timestamp: Optional[datetime] = None
 
     device_id: str = ""

@@ -6,6 +6,12 @@
   "mqtt": {
     "broker_host": "localhost",
     "broker_port": 1883,
-    "topic_prefix": "marine/telemetry"
+    "topic_prefix": "marine/telemetry",
+    "retry_interval_seconds": 10
+  },
+
+  "storage": {
+    "publisher_database": "output/publisher.db",
+    "telemetry_database": "output/telemetry.db"
   }
 }

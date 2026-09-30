@@ -47,3 +47,12 @@ class MarineConfig:
 
     def get_mqtt_config(self):
         return self.config["mqtt"]
+
+    def get_publisher_database(self):
+        return self.config["storage"]["publisher_database"]
+
+    def get_telemetry_database(self):
+        return self.config["storage"]["telemetry_database"]
+    
+    def get_retry_interval(self):
+        return self.config["mqtt"]["retry_interval_seconds"]

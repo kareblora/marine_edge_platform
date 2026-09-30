@@ -1,7 +1,7 @@
 import json
 import time
 
-from metrics import (
+from .metrics import (
     replay_success_total,
     replay_failure_total,
 )

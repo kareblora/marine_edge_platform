@@ -1,7 +1,7 @@
 import json
 import time
 
-from metrics import (
+from .metrics import (
     sync_attempt_total,
     sync_connection_failure_total,
 )

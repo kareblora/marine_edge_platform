@@ -1,7 +1,7 @@
 import json
 import paho.mqtt.client as mqtt
 
-from metrics import (
+from .metrics import (
     mqtt_connection_status,
     mqtt_receive_total,
     telemetry_store_total,

@@ -54,5 +54,5 @@ class MarineConfig:
     def get_telemetry_database(self):
         return self.config["storage"]["telemetry_database"]
     
-    # def get_storage_config(self):
-    #     return self.config["storage"]
+    def get_retry_interval(self):
+        return self.config["mqtt"]["retry_interval_seconds"]

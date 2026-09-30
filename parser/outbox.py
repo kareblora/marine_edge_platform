@@ -1,6 +1,10 @@
 import json
 import sqlite3
 
+from metrics import (
+    outbox_messages_added_total,
+    outbox_pending_messages,
+)
 
 class TelemetryOutbox:
 
@@ -49,6 +53,8 @@ class TelemetryOutbox:
         )
 
         self.connection.commit()
+        outbox_messages_added_total.inc()
+        self.update_pending_metric()
 
     def mark_sent(self, message_id):
         self.connection.execute(
@@ -61,6 +67,7 @@ class TelemetryOutbox:
         )
 
         self.connection.commit()
+        self.update_pending_metric()
 
     def get_pending(self):
         cursor = self.connection.execute(
@@ -110,3 +117,16 @@ class TelemetryOutbox:
 
     def close(self):
         self.connection.close()
+        
+    def get_pending_count(self):
+        cursor = self.conn.execute(
+        "SELECT COUNT(*) FROM outbox WHERE status = 'PENDING'"
+    )
+
+        return cursor.fetchone()[0]
+
+    def update_pending_metric(self):
+        outbox_pending_messages.set(
+            self.get_pending_count()
+        )
+        

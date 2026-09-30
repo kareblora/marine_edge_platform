@@ -1,6 +1,12 @@
 import json
 import paho.mqtt.client as mqtt
 
+from metrics import (
+    mqtt_connection_status,
+    mqtt_receive_total,
+    telemetry_store_total,
+    telemetry_store_failure_total,
+)
 
 class MQTTSubscriber:
 
@@ -19,31 +25,42 @@ class MQTTSubscriber:
         self.message_count = 0
 
     def on_connect(self, client, userdata, flags, reason_code, properties):
-        print(f"Connected to MQTT broker: {reason_code}")
+        
+        if reason_code == 0:
+            mqtt_connection_status.set(1)
+            print(f"Connected to MQTT broker: {reason_code}")
 
-        client.subscribe(
-            self.topic,
-            qos=1
-        )
+            client.subscribe(
+                self.topic,
+                qos=1
+            )
 
-        print(f"Subscribed to: {self.topic}")
+            print(f"Subscribed to: {self.topic}")
 
     def on_message(self, client, userdata, message):
-        payload = json.loads(
-            message.payload.decode("utf-8")
-        )
+        mqtt_receive_total.inc()
+        
+        try:
+            payload = json.loads(
+                message.payload.decode("utf-8")
+            )
 
-        self.storage.save(payload)
-        self.message_count += 1
+            self.storage.save(payload)
+            self.message_count += 1
+            telemetry_store_total.inc()
+            
+            print(
+                f"Received message #{self.message_count}"
+            )
 
-        print(
-            f"Received message #{self.message_count}"
-        )
-
-        print(
-            f"Stored telemetry: "
-            f"{payload.get('timestamp')}"
-        )
+            print(
+                f"Stored telemetry: "
+                f"{payload.get('timestamp')}"
+            )
+        
+        except Exception as e:
+            telemetry_store_failure_total.inc()
+            print(f"Failed to process telemetry: {e}")    
 
     def start(self):
         self.client.connect(

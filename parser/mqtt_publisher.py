@@ -1,6 +1,12 @@
 import json
 import paho.mqtt.client as mqtt
 
+from metrics import (
+    mqtt_connection_status,
+    mqtt_publish_total,
+    mqtt_publish_success_total,
+    mqtt_publish_failure_total,
+)
 
 class MQTTPublisher:
 
@@ -22,24 +28,19 @@ class MQTTPublisher:
             )
 
             self.client.loop_start()
+            mqtt_connection_status.set(1)
 
             return True
 
         except Exception as error:
+            mqtt_connection_status.set(0)
             print(f"MQTT connection failed: {error}")
             return False
 
-    # def connect(self):
-    #     self.client.connect(
-    #         self.broker_host,
-    #         self.broker_port,
-    #         60
-    #     )
-        
-    #     self.client.loop_start()
-
     def publish(self, topic, payload):
         message = json.dumps(payload)
+        
+        mqtt_publish_total.inc()
 
         try:
             result = self.client.publish(
@@ -51,10 +52,12 @@ class MQTTPublisher:
             result.wait_for_publish(
                 timeout=5
             )
-
+            
             if not result.is_published():
+                mqtt_publish_failure_total.inc()
                 return False
 
+            mqtt_publish_success_total.inc()
             return True
 
         except Exception as error:
@@ -62,20 +65,20 @@ class MQTTPublisher:
             print(
                 f"MQTT publish failed: {error}"
             )
-
+            
+            mqtt_publish_failure_total.inc()
             return False
         
-        
-        #result = self.client.publish(
-        #    topic,
-        #    message,
-        #    qos=1
-        #)
-
         result.wait_for_publish(timeout=5)   
 
         return result.rc
 
     def disconnect(self):
-        self.client.disconnect()
-        self.client.loop_stop()
+        # self.client.disconnect()
+        # self.client.loop_stop()   
+        try:
+            self.client.disconnect()
+            self.client.loop_stop()
+        
+        finally:
+            mqtt_connection_status.set(0)

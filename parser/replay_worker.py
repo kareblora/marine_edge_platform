@@ -1,6 +1,10 @@
 import json
 import time
 
+from metrics import (
+    replay_success_total,
+    replay_failure_total,
+)
 
 class ReplayWorker:
 
@@ -38,6 +42,7 @@ class ReplayWorker:
                     self.outbox.mark_sent(
                         message_id
                     )
+                    replay_success_total.inc()
 
                     total_replayed += 1
 
@@ -46,6 +51,7 @@ class ReplayWorker:
                     self.outbox.increment_attempts(
                         message_id
                     )
+                    replay_failure_total.inc()
 
                     print(
                         f"Replay failed: {message_id}"

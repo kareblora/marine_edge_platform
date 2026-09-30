@@ -1,6 +1,11 @@
 import json
 import time
 
+from metrics import (
+    sync_attempt_total,
+    sync_connection_failure_total,
+)
+
 class EdgeSyncAgent:
 
     def __init__(
@@ -19,10 +24,12 @@ class EdgeSyncAgent:
 
         while True:
 
+            sync_attempt_total.inc()
             connected = self.mqtt_publisher.connect()
 
             if not connected:
 
+                sync_connection_failure_total.inc()
                 print(
                     f"MQTT unavailable. "
                     f"Retrying in "

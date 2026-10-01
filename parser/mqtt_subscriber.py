@@ -20,10 +20,17 @@ class MQTTSubscriber:
             callback_api_version=mqtt.CallbackAPIVersion.VERSION2
         )
 
+        # Automatic MQTT reconnect backoff
+        self.client.reconnect_delay_set(
+            min_delay=1,
+            max_delay=30
+        )
+
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.message_count = 0
-
+        self.client.on_disconnect = self.on_disconnect
+        
     def on_connect(self, client, userdata, flags, reason_code, properties):
         
         if reason_code == 0:
@@ -62,6 +69,11 @@ class MQTTSubscriber:
             telemetry_store_failure_total.inc()
             print(f"Failed to process telemetry: {e}")    
 
+    def on_disconnect(self, client, userdata, disconnect_flags, reason_code, properties):
+        mqtt_connection_status.set(0)
+
+        print(f"MQTT disconnected: {reason_code}")
+    
     def start(self):
         self.client.connect(
             self.broker_host,

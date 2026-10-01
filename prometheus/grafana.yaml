@@ -3,20 +3,10 @@
   "kind": "Dashboard",
   "metadata": {
     "name": "admrndj",
-    "namespace": "default",
-    "uid": "dff5c5bd-3b01-4aa1-842d-514ca7028f88",
-    "resourceVersion": "1790861017551018",
-    "generation": 15,
+    "generation": 16,
     "creationTimestamp": "2026-10-01T12:15:34Z",
-    "labels": {
-      "grafana.app/deprecatedInternalID": "2451687617630208"
-    },
-    "annotations": {
-      "grafana.app/createdBy": "user:ffzwnq1g3oav4f",
-      "grafana.app/saved-from-ui": "Grafana v13.2.3 (90ffed056f)",
-      "grafana.app/updatedBy": "user:ffzwnq1g3oav4f",
-      "grafana.app/updatedTimestamp": "2026-10-01T13:23:37Z"
-    }
+    "labels": {},
+    "annotations": {}
   },
   "spec": {
     "annotations": [
@@ -27,10 +17,10 @@
             "kind": "DataQuery",
             "group": "grafana",
             "version": "v0",
-            "datasource": {
-              "name": "-- Grafana --"
-            },
-            "spec": {}
+            "spec": {},
+            "labels": {
+              "grafana.app/export-label": "grafana-1"
+            }
           },
           "enable": true,
           "hide": true,
@@ -61,14 +51,15 @@
                       "kind": "DataQuery",
                       "group": "prometheus",
                       "version": "v0",
-                      "datasource": {
-                        "name": "efzwv1o9tpw5ca"
-                      },
                       "spec": {
                         "editorMode": "code",
                         "expr": "marine_mqtt_subscriber_connection_status{job=\"marine-subscriber\"}",
                         "legendFormat": "__auto",
                         "range": true
+                      },
+                      "labels": {
+                        "grafana.app/export-label": "prometheus-1",
+                        "grafana.app/export-datasource-name": "prometheus"
                       }
                     },
                     "refId": "A",
@@ -163,14 +154,15 @@
                       "kind": "DataQuery",
                       "group": "prometheus",
                       "version": "v0",
-                      "datasource": {
-                        "name": "efzwv1o9tpw5ca"
-                      },
                       "spec": {
                         "editorMode": "code",
                         "expr": "marine_mqtt_receive_total{job=\"marine-subscriber\"}",
                         "legendFormat": "__auto",
                         "range": true
+                      },
+                      "labels": {
+                        "grafana.app/export-label": "prometheus-1",
+                        "grafana.app/export-datasource-name": "prometheus"
                       }
                     },
                     "refId": "A",
@@ -248,14 +240,15 @@
                       "kind": "DataQuery",
                       "group": "prometheus",
                       "version": "v0",
-                      "datasource": {
-                        "name": "efzwv1o9tpw5ca"
-                      },
                       "spec": {
                         "editorMode": "code",
                         "expr": "marine_telemetry_store_total{job=\"marine-subscriber\"}",
                         "legendFormat": "__auto",
                         "range": true
+                      },
+                      "labels": {
+                        "grafana.app/export-label": "prometheus-1",
+                        "grafana.app/export-datasource-name": "prometheus"
                       }
                     },
                     "refId": "A",
@@ -333,14 +326,15 @@
                       "kind": "DataQuery",
                       "group": "prometheus",
                       "version": "v0",
-                      "datasource": {
-                        "name": "efzwv1o9tpw5ca"
-                      },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "marine_outbox_pending_messages",
+                        "expr": "marine_outbox_pending_messages{job=\"marine-sync-agent\"}",
                         "legendFormat": "__auto",
                         "range": true
+                      },
+                      "labels": {
+                        "grafana.app/export-label": "prometheus-1",
+                        "grafana.app/export-datasource-name": "prometheus"
                       }
                     },
                     "refId": "A",
@@ -417,14 +411,15 @@
                       "kind": "DataQuery",
                       "group": "prometheus",
                       "version": "v0",
-                      "datasource": {
-                        "name": "efzwv1o9tpw5ca"
-                      },
                       "spec": {
                         "editorMode": "code",
                         "expr": "marine_mqtt_subscriber_connection_status{job=\"marine-subscriber\"}",
                         "legendFormat": "__auto",
                         "range": true
+                      },
+                      "labels": {
+                        "grafana.app/export-label": "prometheus-1",
+                        "grafana.app/export-datasource-name": "prometheus"
                       }
                     },
                     "refId": "A",
@@ -537,14 +532,15 @@
                       "kind": "DataQuery",
                       "group": "prometheus",
                       "version": "v0",
-                      "datasource": {
-                        "name": "efzwv1o9tpw5ca"
-                      },
                       "spec": {
                         "editorMode": "code",
                         "expr": "rate(marine_mqtt_receive_total{job=\"marine-subscriber\"}[5m])",
                         "legendFormat": "__auto",
                         "range": true
+                      },
+                      "labels": {
+                        "grafana.app/export-label": "prometheus-1",
+                        "grafana.app/export-datasource-name": "prometheus"
                       }
                     },
                     "refId": "A",
@@ -651,14 +647,15 @@
                       "kind": "DataQuery",
                       "group": "prometheus",
                       "version": "v0",
-                      "datasource": {
-                        "name": "efzwv1o9tpw5ca"
-                      },
                       "spec": {
                         "editorMode": "code",
                         "expr": "marine_replay_failure_total{job=\"marine-sync-agent\"}",
                         "legendFormat": "__auto",
                         "range": true
+                      },
+                      "labels": {
+                        "grafana.app/export-label": "prometheus-1",
+                        "grafana.app/export-datasource-name": "prometheus"
                       }
                     },
                     "refId": "A",
@@ -735,14 +732,15 @@
                       "kind": "DataQuery",
                       "group": "prometheus",
                       "version": "v0",
-                      "datasource": {
-                        "name": "efzwv1o9tpw5ca"
-                      },
                       "spec": {
                         "editorMode": "code",
                         "expr": "marine_replay_success_total{job=\"marine-sync-agent\"}",
                         "legendFormat": "__auto",
                         "range": true
+                      },
+                      "labels": {
+                        "grafana.app/export-label": "prometheus-1",
+                        "grafana.app/export-datasource-name": "prometheus"
                       }
                     },
                     "refId": "A",

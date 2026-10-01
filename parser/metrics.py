@@ -28,6 +28,10 @@ mqtt_receive_total = Counter(
     "Total MQTT messages received"
 )
 
+mqtt_connection_failure_total = Counter(
+    "marine_mqtt_connection_failure_total",
+    "Total failed MQTT connection attempts"
+)
 
 # Telemetry persistence
 telemetry_store_total = Counter(

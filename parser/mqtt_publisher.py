@@ -3,6 +3,7 @@ import paho.mqtt.client as mqtt
 
 from .metrics import (
     mqtt_connection_status,
+    mqtt_connection_failure_total,
     mqtt_publish_total,
     mqtt_publish_success_total,
     mqtt_publish_failure_total,
@@ -34,6 +35,7 @@ class MQTTPublisher:
 
         except Exception as error:
             mqtt_connection_status.set(0)
+            mqtt_connection_failure_total.inc()
             print(f"MQTT connection failed: {error}")
             return False
 

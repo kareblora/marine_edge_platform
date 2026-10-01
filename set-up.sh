@@ -1,18 +1,18 @@
 #!/bin/bash
 
-# Installing required tools
-sudo apt update -y
-sudo apt install python3 -y
-sudo apt install python3.12-venv -y
-sudo apt install git -y
-sudo apt install sqlite3 -y
-
 # Setting up GIT credentials
+sudo apt install git -y
 git config --global user.email "kp.reblora@gmail.com"
 git config --global user.name "kevin"
 git clone https://github.com/kareblora/marine_edge_platform.git
 cd marine_edge_platform
 git checkout observability
+
+# Installing required tools
+sudo apt update -y
+sudo apt install python3 -y
+sudo apt install python3.12-venv -y
+sudo apt install sqlite3 -y
 
 # Installing required python modules
 python3 -m venv .venv

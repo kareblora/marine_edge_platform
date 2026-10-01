@@ -25,6 +25,7 @@ class EdgeSyncAgent:
         while True:
 
             sync_attempt_total.inc()
+            self.replay_worker.outbox.update_pending_metric()
             connected = self.mqtt_publisher.connect()
 
             if not connected:
@@ -36,6 +37,7 @@ class EdgeSyncAgent:
                     f"{self.retry_interval} seconds."
                 )
 
+                self.replay_worker.outbox.update_pending_metric()
                 time.sleep(
                     self.retry_interval
                 )
@@ -46,6 +48,8 @@ class EdgeSyncAgent:
 
             #replayed = self.replay_pending()
             replayed = self.replay_worker.replay()
+            
+            self.replay_worker.outbox.update_pending_metric()
 
             self.mqtt_publisher.disconnect()
 

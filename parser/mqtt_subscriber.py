@@ -2,8 +2,9 @@ import json
 import paho.mqtt.client as mqtt
 
 from .metrics import (
-    mqtt_connection_status,
+    mqtt_subscriber_connection_status,
     mqtt_receive_total,
+    mqtt_subscriber_connection_failure_total,
     telemetry_store_total,
     telemetry_store_failure_total,
 )
@@ -34,7 +35,7 @@ class MQTTSubscriber:
     def on_connect(self, client, userdata, flags, reason_code, properties):
         
         if reason_code == 0:
-            mqtt_connection_status.set(1)
+            mqtt_subscriber_connection_status.set(1)
             print(f"Connected to MQTT broker: {reason_code}")
 
             client.subscribe(
@@ -70,15 +71,32 @@ class MQTTSubscriber:
             print(f"Failed to process telemetry: {e}")    
 
     def on_disconnect(self, client, userdata, disconnect_flags, reason_code, properties):
-        mqtt_connection_status.set(0)
+        mqtt_subscriber_connection_status.set(0)
 
         print(f"MQTT disconnected: {reason_code}")
-    
-    def start(self):
-        self.client.connect(
-            self.broker_host,
-            self.broker_port,
-            60
-        )
 
-        self.client.loop_forever()
+    def start(self):
+        try:
+            self.client.connect(
+                self.broker_host,
+                self.broker_port,
+                60
+            )
+
+            self.client.loop_forever()
+
+        except Exception as e:
+            mqtt_subscriber_connection_failure_total.inc()
+
+            print(f"MQTT connection failed: {e}")
+
+    
+    # def start(self):
+        
+    #     self.client.connect(
+    #         self.broker_host,
+    #         self.broker_port,
+    #         60
+    #     )
+
+    #     self.client.loop_forever()

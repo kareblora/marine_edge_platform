@@ -3,9 +3,19 @@ from prometheus_client import start_http_server
 
 
 # MQTT
-mqtt_connection_status = Gauge(
-    "marine_mqtt_connection_status",
-    "MQTT connection status: 1 connected, 0 disconnected"
+# mqtt_connection_status = Gauge(
+#     "marine_mqtt_connection_status",
+#     "MQTT connection status: 1 connected, 0 disconnected"
+# )
+
+mqtt_publisher_connection_status = Gauge(
+    "marine_mqtt_publisher_connection_status",
+    "MQTT publisher connection status: 1 connected, 0 disconnected"
+)
+
+mqtt_subscriber_connection_status = Gauge(
+    "marine_mqtt_subscriber_connection_status",
+    "MQTT subscriber connection status: 1 connected, 0 disconnected"
 )
 
 mqtt_publish_total = Counter(
@@ -28,9 +38,14 @@ mqtt_receive_total = Counter(
     "Total MQTT messages received"
 )
 
-mqtt_connection_failure_total = Counter(
-    "marine_mqtt_connection_failure_total",
-    "Total failed MQTT connection attempts"
+mqtt_publisher_connection_failure_total = Counter(
+    "marine_mqtt_publisher_connection_failure_total",
+    "Total failed MQTT publisher connection attempts"
+)
+
+mqtt_subscriber_connection_failure_total = Counter(
+    "marine_mqtt_subscriber_connection_failure_total",
+    "Total failed MQTT subscriber connection attempts"
 )
 
 # Telemetry persistence

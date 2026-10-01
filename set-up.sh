@@ -25,12 +25,12 @@ pip install prometheus-client
 sudo apt install mosquitto mosquitto-clients -y
 sudo systemctl enable --now mosquitto
 
-# Installing local Prometheus
-sudo apt install prometheus prometheus-node-exporter -y
-sudo systemctl status prometheus
-
 # Checking MQTT client is sending messages
 #mosquitto_sub \
 #  -h localhost \
 #  -t 'marine/telemetry/GARMIN-DIVE-001/DIVE-136' \
 #  -v
+
+# Checking SQL database
+# sqlite3 output/publisher.db \
+# "SELECT COUNT(*) FROM outbox WHERE status='PENDING';"

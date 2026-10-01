@@ -83,4 +83,4 @@ class MQTTPublisher:
             self.client.loop_stop()
         
         finally:
-            mqtt_connection_status.set(0)
+            mqtt_publisher_connection_status.set(0)

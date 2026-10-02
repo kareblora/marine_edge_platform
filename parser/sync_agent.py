@@ -1,5 +1,7 @@
 import json
 import time
+import urllib.request
+import urllib.error
 
 from .metrics import (
     sync_attempt_total,
@@ -64,7 +66,19 @@ class EdgeSyncAgent:
             time.sleep(
                 self.retry_interval
             )
+    
+    def subscriber_is_ready(self):
+        try:
+            response = urllib.request.urlopen(
+                "http://localhost:8081/health/ready",
+                timeout=2
+            )
 
+            return response.status == 200
+
+        except Exception:
+            return False
+    
     def replay_pending(self):
 
         total_replayed = 0

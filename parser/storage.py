@@ -12,6 +12,10 @@ class TelemetryStorage:
             timeout=30
         )
 
+        self.connection.execute(
+            "PRAGMA journal_mode=WAL"
+        )
+        
         self.create_table()
 
     def create_table(self):

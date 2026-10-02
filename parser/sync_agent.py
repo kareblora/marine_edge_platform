@@ -1,7 +1,6 @@
 import json
 import time
 import urllib.request
-import urllib.error
 
 from .metrics import (
     sync_attempt_total,

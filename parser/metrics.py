@@ -18,6 +18,11 @@ mqtt_subscriber_connection_status = Gauge(
     "MQTT subscriber connection status: 1 connected, 0 disconnected"
 )
 
+mqtt_subscriber_ready = Gauge(
+    "marine_mqtt_subscriber_ready",
+    "MQTT subscriber ready to receive telemetry: 1 ready, 0 not ready"
+)
+
 mqtt_publish_total = Counter(
     "marine_mqtt_publish_total",
     "Total MQTT publish attempts"

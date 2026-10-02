@@ -5,6 +5,7 @@ from .metrics import (
     mqtt_subscriber_connection_status,
     mqtt_receive_total,
     mqtt_subscriber_connection_failure_total,
+    mqtt_subscriber_ready,
     telemetry_store_total,
     telemetry_store_failure_total,
 )
@@ -30,20 +31,22 @@ class MQTTSubscriber:
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.message_count = 0
+        self.client.on_subscribe = self.on_subscribe
         self.client.on_disconnect = self.on_disconnect
         
     def on_connect(self, client, userdata, flags, reason_code, properties):
         
         if reason_code == 0:
             mqtt_subscriber_connection_status.set(1)
-            print(f"Connected to MQTT broker: {reason_code}")
 
             client.subscribe(
                 self.topic,
                 qos=1
             )
-
-            print(f"Subscribed to: {self.topic}")
+            mqtt_subscriber_ready.set(1)
+            
+            print(f"Connected to MQTT broker: {reason_code}")
+            print(f"Subscribe request sent: {self.topic}")
 
     def on_message(self, client, userdata, message):
         mqtt_receive_total.inc()
@@ -70,8 +73,15 @@ class MQTTSubscriber:
             telemetry_store_failure_total.inc()
             print(f"Failed to process telemetry: {e}")    
 
+    def on_subscribe(self, client, userdata, mid, reason_codes, properties):
+        mqtt_subscriber_ready.set(1)
+
+        print(f"MQTT subscription confirmed: {reason_codes}")
+        print(f"Subscriber is READY")
+
     def on_disconnect(self, client, userdata, disconnect_flags, reason_code, properties):
         mqtt_subscriber_connection_status.set(0)
+        mqtt_subscriber_ready.set(0)
 
         print(f"MQTT disconnected: {reason_code}")
 
@@ -90,13 +100,4 @@ class MQTTSubscriber:
 
             print(f"MQTT connection failed: {e}")
 
-    
-    # def start(self):
-        
-    #     self.client.connect(
-    #         self.broker_host,
-    #         self.broker_port,
-    #         60
-    #     )
 
-    #     self.client.loop_forever()

@@ -13,11 +13,19 @@ class EdgeSyncAgent:
         self,
         replay_worker,
         mqtt_publisher,
-        retry_interval=10
+        retry_interval=10,
+        health_host="localhost",
+        health_port=8081
     ):
         self.replay_worker = replay_worker
         self.mqtt_publisher = mqtt_publisher
         self.retry_interval = retry_interval
+        self.health_host = health_host
+        self.health_port = health_port
+        
+        self.health_url = (
+            f"http://{self.health_host}:{self.health_port}/health/ready"
+        )
 
     def run(self):
 
@@ -74,7 +82,7 @@ class EdgeSyncAgent:
     def subscriber_is_ready(self):
         try:
             response = urllib.request.urlopen(
-                "http://localhost:8081/health/ready",
+                self.health_url,
                 timeout=2
             )
 

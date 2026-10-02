@@ -7,9 +7,12 @@ from parser.metrics import start_metrics_server
 
 start_metrics_server(8003)
 
-config = MarineConfig(
-    "config/config.json"
-)
+config = MarineConfig("config/config.json")
+
+subscriber_config = config.get_subscriber_config()
+
+health_host = subscriber_config["health_host"]
+health_port = subscriber_config["health_port"]
 
 publisher_database = (
     config.get_publisher_database()
@@ -38,7 +41,9 @@ replay_worker = ReplayWorker(
 agent = EdgeSyncAgent(
     replay_worker,
     publisher,
-    retry_interval
+    retry_interval,
+    health_host,
+    health_port
 )
 
 try:

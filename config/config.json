@@ -10,6 +10,11 @@
     "retry_interval_seconds": 10
   },
 
+  "subscriber": {
+    "health_host": "localhost",
+    "health_port": 8081
+  },
+
   "storage": {
     "publisher_database": "output/publisher.db",
     "telemetry_database": "output/telemetry.db"

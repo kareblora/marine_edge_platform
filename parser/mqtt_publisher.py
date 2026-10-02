@@ -70,14 +70,9 @@ class MQTTPublisher:
             
             mqtt_publish_failure_total.inc()
             return False
-        
-        result.wait_for_publish(timeout=5)   
 
-        return result.rc
 
     def disconnect(self):
-        # self.client.disconnect()
-        # self.client.loop_stop()   
         try:
             self.client.disconnect()
             self.client.loop_stop()

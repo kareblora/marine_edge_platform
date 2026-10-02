@@ -43,12 +43,17 @@ class EdgeSyncAgent:
                 time.sleep(
                     self.retry_interval
                 )
-
                 continue
-
+            
+            if not self.subscriber_is_ready():
+                print("Subscriber is not ready. Waiting before replay.")
+                self.mqtt_publisher.disconnect()
+                time.sleep(self.retry_interval)
+                continue
+            
             print("MQTT connection established.")
+            print("Subscriber is ready. Starting replay.")
 
-            #replayed = self.replay_pending()
             replayed = self.replay_worker.replay()
             
             self.replay_worker.outbox.update_pending_metric()

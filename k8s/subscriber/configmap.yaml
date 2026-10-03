@@ -1,0 +1,29 @@
+apiVersion: v1
+data:
+  config.json: |
+    {
+      "device_id": "GARMIN-DIVE-001",
+      "diver_id": "DIVER-001",
+      "dive_id": "DIVE-136",
+
+      "mqtt": {
+        "broker_host": "mosquitto",
+        "broker_port": 1883,
+        "topic_prefix": "marine/telemetry",
+        "retry_interval_seconds": 10
+      },
+
+      "subscriber": {
+        "health_host": "subscriber",
+        "health_port": 8081
+      },
+
+      "storage": {
+        "publisher_database": "output/publisher.db",
+        "telemetry_database": "output/telemetry.db"
+      }
+    }
+kind: ConfigMap
+metadata:
+  name: marine-config
+  namespace: marine-edge

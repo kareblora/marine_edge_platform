@@ -4,14 +4,14 @@
   "dive_id": "DIVE-136",
 
   "mqtt": {
-    "broker_host": "localhost",
+    "broker_host": "mosquitto",
     "broker_port": 1883,
     "topic_prefix": "marine/telemetry",
     "retry_interval_seconds": 10
   },
 
   "subscriber": {
-    "health_host": "localhost",
+    "health_host": "subscriber",
     "health_port": 8081
   },
 

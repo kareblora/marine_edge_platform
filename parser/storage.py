@@ -56,6 +56,8 @@ class TelemetryStorage:
             )
         )
 
+        self.connection.commit()
+
     def commit(self):
         self.connection.commit()
 

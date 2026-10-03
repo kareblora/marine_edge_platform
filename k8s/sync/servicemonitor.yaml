@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: marine-sync-agent
+  namespace: marine-edge
+  labels:
+    release: marine-monitoring
+spec:
+  selector:
+    matchLabels:
+      app: sync-agent
+  namespaceSelector:
+    matchNames:
+      - marine-edge
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s

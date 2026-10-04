@@ -6,9 +6,7 @@ from parser.fit_parser import GarminFitParser
 from parser.normalizer import MarineNormalizer
 from parser.report import DiveReport
 from parser.config import MarineConfig
-from parser.mqtt_publisher import MQTTPublisher
 from parser.outbox import TelemetryOutbox
-from parser.metrics import start_metrics_server
 
 def format_minutes(seconds):
     
@@ -36,31 +34,18 @@ def main():
 
     fit_file = Path(sys.argv[1])
     
-    start_metrics_server(8001)
-
     config = MarineConfig("config/config.json")
 
     device_id = config.get("device_id")
     diver_id = config.get("diver_id")
     dive_id = config.get("dive_id")
-    
-    #storage_config = config.get_storage_config()
-    #database_path = storage_config["database"]
-    
+      
     database_path = config.get_publisher_database()
     
     outbox = TelemetryOutbox(database_path)
         
-    #database_path = config.get("storage")["database"]
-
     mqtt_config = config.get_mqtt_config()
-
-    mqtt_publisher = MQTTPublisher(
-        mqtt_config["broker_host"],
-        mqtt_config["broker_port"]
-    )
-        
-
+    
     if not fit_file.exists():
         print(f"File not found: {fit_file}")
         sys.exit(1)
@@ -85,23 +70,17 @@ def main():
         ).to_dict()
         for record in records
     ]
-
-    print("Connecting to MQTT broker...")
     
-    mqtt_connected = mqtt_publisher.connect()
-    # mqtt_publisher.connect()
-   
     topic = (
         f"{mqtt_config['topic_prefix']}/"
         f"{device_id}/"
         f"{dive_id}"
     )
 
-    
-    print("Publishing telemetry...")
-    
+    print("Staging telemetry in durable outbox...")
+
     for telemetry in normalized_data:
-    
+
         message_id = telemetry["message_id"]
 
         outbox.add(
@@ -110,45 +89,10 @@ def main():
             telemetry
         )
 
-        if mqtt_connected:
-            success = mqtt_publisher.publish(
-                topic,
-                telemetry
-            )
-
-            if success:
-                outbox.mark_sent(
-                    message_id
-                )
-
-            else:
-                print(
-                    f"Buffered telemetry: {message_id}"
-                )
-
-        else:
-            print(
-                f"MQTT unavailable - buffered: {message_id}"
-            )
-        #mqtt_publisher.publish(
-        #    topic,
-        #    telemetry
-        #)
-
-        #outbox.mark_sent(
-        #    message_id
-        #)
-
-    #for telemetry in normalized_data:
-    #    mqtt_publisher.publish(
-    #        topic,
-    #        telemetry
-    #    )   
-        
-    print("Disconnecting from MQTT broker...")
-    mqtt_publisher.disconnect()
-    
-    print("MQTT connection closed.")
+    print(
+        f"Telemetry staged in outbox: "
+        f"{len(normalized_data):,} messages"
+    )
 
 # ---------------------------------------------------------
 # DIVE OPERATIONAL REPORT -- SOURCE

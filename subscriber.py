@@ -1,12 +1,15 @@
 from parser.mqtt_subscriber import MQTTSubscriber
 from parser.config import MarineConfig
 from parser.storage import TelemetryStorage
-from parser.metrics import start_metrics_server
+from parser.metrics import (
+    start_metrics_server,
+    mqtt_subscriber_ready,
+)
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
+
 import threading
 
-from parser.metrics import mqtt_subscriber_ready
 
 class ReadinessHandler(BaseHTTPRequestHandler):
     
@@ -50,9 +53,27 @@ storage = TelemetryStorage(
     telemetry_database
 )
 
+print("[SUBSCRIBER] Starting Marine Edge MQTT Subscriber...")
+print(
+    f"[SUBSCRIBER] MQTT broker: "
+    f"{mqtt_config['broker_host']}:{mqtt_config['broker_port']}"
+)
+print(
+    f"[SUBSCRIBER] MQTT topic: {topic}"
+)
+print(
+    f"[SUBSCRIBER] Telemetry database: "
+    f"{telemetry_database}"
+)
+
 readiness_server = HTTPServer(
     ("0.0.0.0", 8081),
     ReadinessHandler
+)
+
+print(
+    "[SUBSCRIBER] Readiness endpoint: "
+    "http://0.0.0.0:8081/health/ready"
 )
 
 threading.Thread(
@@ -67,6 +88,8 @@ subscriber = MQTTSubscriber(
     storage
 )
 
+print("[SUBSCRIBER] Starting MQTT subscriber...")
+
 try:
     subscriber.start()
 
@@ -74,5 +97,11 @@ except KeyboardInterrupt:
     print("Stopping subscriber...")
 
 finally:
+
+    print("[SUBSCRIBER] Shutting down readiness server...")
+    readiness_server.shutdown()
+
     storage.close()
-    print("Database connection closed.")
+
+    print("[SUBSCRIBER] Database connection closed.")
+

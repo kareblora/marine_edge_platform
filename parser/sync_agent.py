@@ -1,4 +1,3 @@
-import json
 import time
 import urllib.request
 
@@ -28,8 +27,16 @@ class EdgeSyncAgent:
         )
 
     def run(self):
-
-        print("Edge Sync Agent started.")
+        
+        print("[SYNC] Edge Sync Agent started.")
+        print(
+            f"[SYNC] Retry interval: "
+            f"{self.retry_interval} seconds"
+        )
+        print(
+            f"[SYNC] Subscriber readiness URL: "
+            f"{self.health_url}"
+        )
 
         while True:
 
@@ -41,9 +48,8 @@ class EdgeSyncAgent:
 
                 sync_connection_failure_total.inc()
                 print(
-                    f"MQTT unavailable. "
-                    f"Retrying in "
-                    f"{self.retry_interval} seconds."
+                    "[SYNC] MQTT connection failed. "
+                    f"Retrying in {self.retry_interval} seconds."
                 )
 
                 self.replay_worker.outbox.update_pending_metric()
@@ -52,16 +58,41 @@ class EdgeSyncAgent:
                 )
                 continue
             
+            print(
+                    "[SYNC] MQTT connection established."
+            )       
+                 
             if not self.subscriber_is_ready():
-                print("Subscriber is not ready. Waiting before replay.")
-                self.mqtt_publisher.disconnect()
-                time.sleep(self.retry_interval)
-                continue
-            
-            print("MQTT connection established.")
-            print("Subscriber is ready. Starting replay.")
+        
+                print(
+                    "[SYNC] Subscriber is NOT READY. "
+                    "Replay will not start."
+                )
 
+                print(
+                    f"[SYNC] Waiting {self.retry_interval} seconds "
+                    "before retrying."
+                )
+
+                self.mqtt_publisher.disconnect()
+
+                time.sleep(
+                    self.retry_interval
+                )
+
+                continue
+
+            print(
+                "[SYNC] Subscriber is READY. "
+                "Starting replay."
+            )
+            
             replayed = self.replay_worker.replay()
+            
+            print(
+                f"[SYNC] Replay cycle completed. "
+                f"Messages replayed: {replayed}"
+            )
             
             self.replay_worker.outbox.update_pending_metric()
 
@@ -70,8 +101,11 @@ class EdgeSyncAgent:
             if replayed == 0:
 
                 print(
-                    "No pending telemetry. "
-                    f"Next check in "
+                    "[SYNC] No pending telemetry."
+                )
+
+                print(
+                    f"[SYNC] Next sync attempt in "
                     f"{self.retry_interval} seconds."
                 )
 
@@ -80,74 +114,40 @@ class EdgeSyncAgent:
             )
     
     def subscriber_is_ready(self):
+    
+        print(
+            f"[SYNC] Checking subscriber readiness: "
+            f"{self.health_url}"
+        )
+
         try:
+
             response = urllib.request.urlopen(
                 self.health_url,
                 timeout=2
             )
 
-            return response.status == 200
+            if response.status == 200:
 
-        except Exception:
-            return False
-    
-    def replay_pending(self):
-
-        total_replayed = 0
-
-        while True:
-
-            pending = self.outbox.get_pending(
-                limit=100
-            )
-
-            if not pending:
-                break
-
-            print(
-                f"Replaying batch: "
-                f"{len(pending)} messages"
-            )
-
-            for row in pending:
-
-                message_id = row[0]
-                topic = row[1]
-                payload = json.loads(row[2])
-
-                success = (
-                    self.mqtt_publisher.publish(
-                        topic,
-                        payload
-                    )
+                print(
+                    "[SYNC] Subscriber is READY."
                 )
 
-                if success:
-
-                    self.outbox.mark_sent(
-                        message_id
-                    )
-
-                    total_replayed += 1
-
-                else:
-
-                    self.outbox.increment_attempts(
-                        message_id
-                    )
-
-                    print(
-                        f"Replay failed: "
-                        f"{message_id}"
-                    )
-
-                    return total_replayed
-
-        if total_replayed > 0:
+                return True
 
             print(
-                f"Replay complete: "
-                f"{total_replayed} messages"
+                f"[SYNC] Subscriber is NOT READY. "
+                f"HTTP status: {response.status}"
             )
 
-        return total_replayed
+            return False
+
+        except Exception as error:
+
+            print(
+                f"[SYNC] Subscriber readiness check failed: "
+                f"{error}"
+            )
+
+            return False
+    

@@ -30,7 +30,8 @@ class TelemetryOutbox:
                 payload TEXT NOT NULL,
                 local_status TEXT NOT NULL DEFAULT 'PENDING',
                 cloud_status TEXT NOT NULL DEFAULT 'PENDING',
-                attempts INTEGER NOT NULL DEFAULT 0
+                local_attempts INTEGER NOT NULL DEFAULT 0,
+                cloud_attempts INTEGER NOT NULL DEFAULT 0
             )
         """)
 
@@ -72,11 +73,11 @@ class TelemetryOutbox:
         self.connection.commit()
         self.update_pending_metric()
 
-    def increment_attempts(self, message_id):
+    def increment_local_attempts(self, message_id):
         self.connection.execute(
             """
             UPDATE outbox
-            SET attempts = attempts + 1
+            SET local_attempts = local_attempts + 1
             WHERE message_id = ?
             """,
             (message_id,)
@@ -91,7 +92,7 @@ class TelemetryOutbox:
                 message_id,
                 topic,
                 payload,
-                attempts
+                local_attempts
             FROM outbox
             WHERE local_status = 'PENDING'
             ORDER BY rowid
@@ -117,3 +118,43 @@ class TelemetryOutbox:
             self.get_pending_count()
         )
         
+    def get_cloud_pending(self, limit=100):
+        cursor = self.connection.execute(
+            """
+            SELECT
+                message_id,
+                payload,
+                cloud_attempts
+            FROM outbox
+            WHERE cloud_status = 'PENDING'
+            ORDER BY rowid
+            LIMIT ?
+            """,
+            (limit,)
+        )
+
+        return cursor.fetchall()
+
+    def mark_cloud_sent(self, message_id):
+        self.connection.execute(
+            """
+            UPDATE outbox
+            SET cloud_status = 'SENT'
+            WHERE message_id = ?
+            """,
+            (message_id,)
+        )
+
+        self.connection.commit()
+
+    def increment_cloud_attempts(self, message_id):
+        self.connection.execute(
+            """
+            UPDATE outbox
+            SET cloud_attempts = cloud_attempts + 1
+            WHERE message_id = ?
+            """,
+            (message_id,)
+        )
+
+        self.connection.commit()

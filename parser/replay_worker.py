@@ -48,7 +48,7 @@ class ReplayWorker:
 
                 else:
 
-                    self.outbox.increment_attempts(
+                    self.outbox.increment_local_attempts(
                         message_id
                     )
                     replay_failure_total.inc()

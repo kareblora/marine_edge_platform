@@ -10,11 +10,9 @@ class CloudSyncWorker:
         self,
         outbox,
         cloud_client,
-        retry_interval=10,
     ):
         self.outbox = outbox
         self.cloud_client = cloud_client
-        self.retry_interval = retry_interval
 
     def sync(self):
         total_synced = 0

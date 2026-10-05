@@ -28,7 +28,8 @@ class TelemetryOutbox:
                 message_id TEXT PRIMARY KEY,
                 topic TEXT NOT NULL,
                 payload TEXT NOT NULL,
-                status TEXT NOT NULL DEFAULT 'PENDING',
+                local_status TEXT NOT NULL DEFAULT 'PENDING',
+                cloud_status TEXT NOT NULL DEFAULT 'PENDING',
                 attempts INTEGER NOT NULL DEFAULT 0
             )
         """)
@@ -41,9 +42,11 @@ class TelemetryOutbox:
             INSERT OR IGNORE INTO outbox (
                 message_id,
                 topic,
-                payload
+                payload,
+                local_status,
+                cloud_status
             )
-            VALUES (?, ?, ?)
+            VALUES (?, ?, ?, 'PENDING', 'PENDING')
             """,
             (
                 message_id,
@@ -60,7 +63,7 @@ class TelemetryOutbox:
         self.connection.execute(
             """
             UPDATE outbox
-            SET status = 'SENT'
+            SET local_status = 'SENT'
             WHERE message_id = ?
             """,
             (message_id,)
@@ -68,22 +71,6 @@ class TelemetryOutbox:
 
         self.connection.commit()
         self.update_pending_metric()
-
-    def get_pending(self):
-        cursor = self.connection.execute(
-            """
-            SELECT
-                message_id,
-                topic,
-                payload,
-                attempts
-            FROM outbox
-            WHERE status = 'PENDING'
-            ORDER BY rowid
-            """
-        )
-
-        return cursor.fetchall()
 
     def increment_attempts(self, message_id):
         self.connection.execute(
@@ -106,7 +93,7 @@ class TelemetryOutbox:
                 payload,
                 attempts
             FROM outbox
-            WHERE status = 'PENDING'
+            WHERE local_status = 'PENDING'
             ORDER BY rowid
             LIMIT ?
             """,
@@ -120,7 +107,7 @@ class TelemetryOutbox:
         
     def get_pending_count(self):
         cursor = self.connection.execute(
-        "SELECT COUNT(*) FROM outbox WHERE status = 'PENDING'"
+        "SELECT COUNT(*) FROM outbox WHERE local_status = 'PENDING'"
     )
 
         return cursor.fetchone()[0]

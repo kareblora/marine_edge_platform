@@ -101,6 +101,18 @@ telemetry_processing_seconds = Histogram(
     "Time spent processing a telemetry record"
 )
 
+# Cloud agent
+cloud_sync_success_total = Counter(
+    "marine_cloud_sync_success_total",
+    "Total number of telemetry messages successfully synchronized to the cloud"
+)
+
+cloud_sync_failure_total = Counter(
+    "marine_cloud_sync_failure_total",
+    "Total number of failed cloud synchronization attempts"
+)
+
+
 def start_metrics_server(port):
     start_http_server(port)
     print(f"Prometheus metrics available on port {port}")

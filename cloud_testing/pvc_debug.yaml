@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: publisher-db-debug
+  namespace: marine-edge
+spec:
+  restartPolicy: Never
+  containers:
+    - name: debug
+      image: python:3.12-slim
+      command: ["sleep", "3600"]
+      volumeMounts:
+        - name: publisher-data
+          mountPath: /app/output
+  volumes:
+    - name: publisher-data
+      persistentVolumeClaim:
+        claimName: publisher-data

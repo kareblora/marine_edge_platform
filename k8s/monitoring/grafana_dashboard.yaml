@@ -62,7 +62,7 @@ data:
                           "version": "v0",
                           "spec": {
                             "editorMode": "code",
-                            "expr": "marine_mqtt_subscriber_connection_status{job=\"subscriber\"}",
+                            "expr": "max(marine_mqtt_subscriber_connection_status{job=\"subscriber\"})",
                             "legendFormat": "__auto",
                             "range": true
                           },
@@ -165,7 +165,7 @@ data:
                           "version": "v0",
                           "spec": {
                             "editorMode": "code",
-                            "expr": "marine_mqtt_receive_total{job=\"subscriber\"}",
+                            "expr": "sum(marine_mqtt_receive_total{job=\"subscriber\"})",
                             "legendFormat": "__auto",
                             "range": true
                           },
@@ -251,7 +251,7 @@ data:
                           "version": "v0",
                           "spec": {
                             "editorMode": "code",
-                            "expr": "marine_telemetry_store_total{job=\"subscriber\"}",
+                            "expr": "sum(marine_telemetry_store_total{job=\"subscriber\"})",
                             "legendFormat": "__auto",
                             "range": true
                           },
@@ -422,7 +422,7 @@ data:
                           "version": "v0",
                           "spec": {
                             "editorMode": "code",
-                            "expr": "marine_mqtt_subscriber_connection_status{job=\"subscriber\"}",
+                            "expr": "max(marine_mqtt_subscriber_connection_status{job=\"subscriber\"})",
                             "legendFormat": "__auto",
                             "range": true
                           },
@@ -543,7 +543,7 @@ data:
                           "version": "v0",
                           "spec": {
                             "editorMode": "code",
-                            "expr": "rate(marine_mqtt_receive_total{job=\"subscriber\"}[5m])",
+                            "expr": "sum(rate(marine_mqtt_receive_total{job=\"subscriber\"}[5m]))",
                             "legendFormat": "__auto",
                             "range": true
                           },

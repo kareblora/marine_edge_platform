@@ -1,8 +1,12 @@
+import logging
+from .logging_config import configure_logging
 from .metrics import (
     cloud_sync_success_total,
     cloud_sync_failure_total,
 )
 
+configure_logging()
+logger = logging.getLogger("CloudSyncWorker")
 
 class CloudSyncWorker:
 
@@ -26,10 +30,7 @@ class CloudSyncWorker:
             if not pending:
                 break
 
-            print(
-                f"[CLOUD SYNC] Processing "
-                f"{len(pending)} messages."
-            )
+            logger.info( "Processing %s pending messages.", len(pending))
 
             for row in pending:
 
@@ -59,16 +60,13 @@ class CloudSyncWorker:
 
                     cloud_sync_failure_total.inc()
 
-                    print(
-                        f"[CLOUD SYNC] Failed: "
-                        f"{message_id}"
-                    )
+                    logger.error("Cloud Synchronization Failed: %s", message_id)
 
                     return total_synced
 
-        print(
-            f"[CLOUD SYNC] Sync complete. "
-            f"Messages synchronized: {total_synced}"
+        logger.info(
+            "Sync complete. Messages synchronized: %s",
+            total_synced
         )
 
         return total_synced

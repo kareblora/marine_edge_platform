@@ -1,4 +1,11 @@
 import time
+import logging
+
+from .logging_config import configure_logging
+
+configure_logging()
+logger = logging.getLogger("CloudSyncAgent")
+
 
 class LocalCloudClient:
     
@@ -22,11 +29,8 @@ class CloudSyncAgent:
 
     def run(self):
 
-        print("[CLOUD SYNC] Cloud Sync Agent started.")
-        print(
-            f"[CLOUD SYNC] Retry interval: "
-            f"{self.retry_interval} seconds"
-        )
+        logger.info("Cloud Sync Agent started.")
+        logger.info("Retry interval: %s seconds", self.retry_interval)
 
         while True:
 
@@ -36,10 +40,7 @@ class CloudSyncAgent:
             
             self.cloud_sync_worker.outbox.update_cloud_pending_metric()
 
-            print(
-                f"[CLOUD SYNC] Sync cycle completed. "
-                f"Messages synchronized: {synced}"
-            )
+            logger.info("Sync cycle completed. Messages synchronized: %s", synced)
 
             time.sleep(
                 self.retry_interval

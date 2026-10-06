@@ -19,6 +19,12 @@ sqlite3 output/publisher.db \
     SUM(CASE WHEN status = 'SENT' THEN 1 ELSE 0 END) AS sent
 FROM outbox;"
 
+# Testing cloud agent
+sqlite3 output/publisher.db \
+"UPDATE outbox SET cloud_status='PENDING' WHERE message_id='e7c8ff28-29e4-409d-9c54-eff8329fa3af';"
+
+sqlite3 output/publisher.db \
+"SELECT message_id, cloud_status, cloud_attempts FROM outbox WHERE message_id='e7c8ff28-29e4-409d-9c54-eff8329fa3af';"
 
 # Kubernetes verification 
 kubectl exec -n marine-edge deploy/sync-agent -- \

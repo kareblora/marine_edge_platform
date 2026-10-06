@@ -1,6 +1,9 @@
+import logging
+
 from prometheus_client import Counter, Gauge, Histogram
 from prometheus_client import start_http_server
 
+logger = logging.getLogger("Metrics")
 
 mqtt_publisher_connection_status = Gauge(
     "marine_mqtt_publisher_connection_status",
@@ -119,4 +122,4 @@ cloud_pending_messages = Gauge(
 
 def start_metrics_server(port):
     start_http_server(port)
-    print(f"Prometheus metrics available on port {port}")
+    logger.info("Prometheus metrics available on port %d", port)

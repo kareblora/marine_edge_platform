@@ -62,7 +62,7 @@ telemetry_store_failure_total = Counter(
 # Outbox
 outbox_pending_messages = Gauge(
     "marine_outbox_pending_messages",
-    "Number of telemetry messages currently pending delivery"
+    "Number of telemetry messages currently pending local delivery"
 )
 
 outbox_messages_added_total = Counter(
@@ -112,6 +112,10 @@ cloud_sync_failure_total = Counter(
     "Total number of failed cloud synchronization attempts"
 )
 
+cloud_pending_messages = Gauge(
+    "marine_cloud_pending_messages",
+    "Number of telemetry messages pending cloud synchronization"
+)
 
 def start_metrics_server(port):
     start_http_server(port)

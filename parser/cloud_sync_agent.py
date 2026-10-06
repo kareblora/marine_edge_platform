@@ -30,7 +30,11 @@ class CloudSyncAgent:
 
         while True:
 
+            self.cloud_sync_worker.outbox.update_cloud_pending_metric()
+            
             synced = self.cloud_sync_worker.sync()
+            
+            self.cloud_sync_worker.outbox.update_cloud_pending_metric()
 
             print(
                 f"[CLOUD SYNC] Sync cycle completed. "

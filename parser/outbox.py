@@ -4,6 +4,7 @@ import sqlite3
 from .metrics import (
     outbox_messages_added_total,
     outbox_pending_messages,
+    cloud_pending_messages,
 )
 
 class TelemetryOutbox:
@@ -158,3 +159,19 @@ class TelemetryOutbox:
         )
 
         self.connection.commit()
+    
+    def get_cloud_pending_count(self):
+        cursor = self.connection.execute(
+            """
+            SELECT COUNT(*)
+            FROM outbox
+            WHERE cloud_status = 'PENDING'
+            """
+        )
+
+        return cursor.fetchone()[0]
+    
+    def update_cloud_pending_metric(self):
+        cloud_pending_messages.set(
+            self.get_cloud_pending_count()
+        )

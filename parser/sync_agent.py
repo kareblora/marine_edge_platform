@@ -1,3 +1,4 @@
+import logging
 import time
 import urllib.request
 
@@ -5,6 +6,8 @@ from .metrics import (
     sync_attempt_total,
     sync_connection_failure_total,
 )
+
+logger = logging.getLogger("EdgeSyncAgent")
 
 class EdgeSyncAgent:
 
@@ -28,15 +31,9 @@ class EdgeSyncAgent:
 
     def run(self):
         
-        print("[SYNC] Edge Sync Agent started.")
-        print(
-            f"[SYNC] Retry interval: "
-            f"{self.retry_interval} seconds"
-        )
-        print(
-            f"[SYNC] Subscriber readiness URL: "
-            f"{self.health_url}"
-        )
+        logger.info("Edge Sync Agent started.")
+        logger.info("Retry interval: %s seconds", self.retry_interval)
+        logger.info("Subscriber readiness URL: %s", self.health_url)
 
         while True:
 
@@ -47,10 +44,7 @@ class EdgeSyncAgent:
             if not connected:
 
                 sync_connection_failure_total.inc()
-                print(
-                    "[SYNC] MQTT connection failed. "
-                    f"Retrying in {self.retry_interval} seconds."
-                )
+                logger.warning("MQTT connection failed. Retrying in %s seconds.", self.retry_interval)
 
                 self.replay_worker.outbox.update_pending_metric()
                 time.sleep(
@@ -58,20 +52,14 @@ class EdgeSyncAgent:
                 )
                 continue
             
-            print(
-                    "[SYNC] MQTT connection established."
-            )       
+            logger.info("MQTT connection established.")
                  
             if not self.subscriber_is_ready():
         
-                print(
-                    "[SYNC] Subscriber is NOT READY. "
-                    "Replay will not start."
-                )
+                logger.warning("Subscriber is NOT READY. Replay will not start.")
 
-                print(
-                    f"[SYNC] Waiting {self.retry_interval} seconds "
-                    "before retrying."
+                logger.info("Waiting %s seconds before retrying.",
+                    self.retry_interval
                 )
 
                 self.mqtt_publisher.disconnect()
@@ -82,17 +70,11 @@ class EdgeSyncAgent:
 
                 continue
 
-            print(
-                "[SYNC] Subscriber is READY. "
-                "Starting replay."
-            )
+            logger.info("Subscriber is READY. Starting replay.")
             
             replayed = self.replay_worker.replay()
             
-            print(
-                f"[SYNC] Replay cycle completed. "
-                f"Messages replayed: {replayed}"
-            )
+            logger.info("Replay cycle completed. Messages replayed: %s", replayed)
             
             self.replay_worker.outbox.update_pending_metric()
 
@@ -100,14 +82,9 @@ class EdgeSyncAgent:
 
             if replayed == 0:
 
-                print(
-                    "[SYNC] No pending telemetry."
-                )
+                logger.info("No pending telemetry.")
 
-                print(
-                    f"[SYNC] Next sync attempt in "
-                    f"{self.retry_interval} seconds."
-                )
+                logger.info("Next sync attempt in %s seconds.", self.retry_interval)
 
             time.sleep(
                 self.retry_interval
@@ -115,10 +92,7 @@ class EdgeSyncAgent:
     
     def subscriber_is_ready(self):
     
-        print(
-            f"[SYNC] Checking subscriber readiness: "
-            f"{self.health_url}"
-        )
+        logger.info("Checking subscriber readiness: %s", self.health_url)
 
         try:
 
@@ -129,24 +103,20 @@ class EdgeSyncAgent:
 
             if response.status == 200:
 
-                print(
-                    "[SYNC] Subscriber is READY."
-                )
+                logger.info("Subscriber is READY.")
 
                 return True
 
-            print(
-                f"[SYNC] Subscriber is NOT READY. "
-                f"HTTP status: {response.status}"
+            logger.warning(
+                "Subscriber is NOT READY. HTTP status: %s", response.status
             )
 
             return False
 
         except Exception as error:
 
-            print(
-                f"[SYNC] Subscriber readiness check failed: "
-                f"{error}"
+            logger.error(
+                "Subscriber readiness check failed: %s", error
             )
 
             return False

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: sync-agent
-          image: marine_edge_platform-sync-agent:latest
+          image: marine-sync-agent:2.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: metrics

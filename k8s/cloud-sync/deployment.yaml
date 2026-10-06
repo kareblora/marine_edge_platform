@@ -1,26 +1,38 @@
-apiVersion: batch/v1
-kind: Job
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: publisher
+  name: cloud-sync-agent
   namespace: marine-edge
 spec:
-  backoffLimit: 3
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloud-sync-agent
   template:
     metadata:
       labels:
-        app: publisher
+        app: cloud-sync-agent
     spec:
-      restartPolicy: OnFailure
       containers:
-        - name: publisher
-          image: marine-publisher:2.0
+        - name: cloud-sync-agent
+          image: marine-cloud-sync-agent:1.0
           imagePullPolicy: IfNotPresent
+          ports:
+            - name: metrics
+              containerPort: 8004
           volumeMounts:
             - name: config
               mountPath: /app/config/config.json
               subPath: config.json
             - name: publisher-data
               mountPath: /app/output
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
       volumes:
         - name: config
           configMap:

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: subscriber
-          image: marine_edge_platform-subscriber:latest
+          image: marine-subscriber:2.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: metrics

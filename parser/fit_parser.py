@@ -1,11 +1,23 @@
+import logging
 from fitparse import FitFile
 
+logger = logging.getLogger("GarminFitParser")
 
 class GarminFitParser:
 
     def __init__(self, filename):
         self.filename = filename
-        self.fitfile = FitFile(str(filename))
+
+        try:
+            self.fitfile = FitFile(str(filename))
+
+        except Exception as error:
+            logger.error(
+                "Failed to load FIT file %s: %s",
+                self.filename,
+                error
+            )
+            raise
 
     def get_records(self):
         records = []

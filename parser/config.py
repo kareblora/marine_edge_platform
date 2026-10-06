@@ -1,6 +1,8 @@
 import json
+import logging
 from pathlib import Path
 
+logger = logging.getLogger("MarineConfig")
 
 class MarineConfig:
 
@@ -15,18 +17,42 @@ class MarineConfig:
         self.config = self._load()
 
     def _load(self):
+        
+        try:
+            if not self.filename.exists():
+                raise FileNotFoundError(
+                    f"Configuration file not found: {self.filename}"
+                )
 
-        if not self.filename.exists():
-            raise FileNotFoundError(
-                f"Configuration file not found: {self.filename}"
+            with open(self.filename) as f:
+                config = json.load(f)
+
+            self._validate(config)
+
+            return config
+
+        except FileNotFoundError as error:
+            logger.error(
+                "Configuration file not found: %s",
+                error
             )
+            raise
 
-        with open(self.filename) as f:
-            config = json.load(f)
+        except json.JSONDecodeError as error:
+            logger.error(
+                "Invalid JSON in configuration file %s: %s",
+                self.filename,
+                error
+            )
+            raise
 
-        self._validate(config)
+        except ValueError as error:
+            logger.error(
+                "Configuration validation failed: %s",
+                error
+            )
+            raise
 
-        return config
 
     def _validate(self, config):
 

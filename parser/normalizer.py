@@ -1,4 +1,5 @@
 import uuid
+import logging
 
 from .models import (
     Telemetry,
@@ -9,56 +10,66 @@ from .models import (
     TelemetryQuality
 )
 
+logger = logging.getLogger("MarineNormalizer")
 
 class MarineNormalizer:
 
     @staticmethod
     def normalize_record(record, device_id, diver_id, dive_id):
 
-        message_id = str(uuid.uuid4())
-        environment = Environment(
-            depth_m=record.get("depth"),
-            temperature_c=record.get("temperature"),
-            absolute_pressure_pa=record.get("absolute_pressure")
-        )
+        try:
+            message_id = str(uuid.uuid4())
+            environment = Environment(
+                depth_m=record.get("depth"),
+                temperature_c=record.get("temperature"),
+                absolute_pressure_pa=record.get("absolute_pressure")
+            )
 
-        physiology = Physiology(
-            heart_rate_bpm=record.get("heart_rate")
-        )
+            physiology = Physiology(
+                heart_rate_bpm=record.get("heart_rate")
+            )
 
-        dive = DiveState(
-            n2_load_percent=record.get("n2_load"),
-            cns_load_percent=record.get("cns_load"),
-            po2=record.get("po2"),
-            time_to_surface_s=record.get("time_to_surface")
-        )
+            dive = DiveState(
+                n2_load_percent=record.get("n2_load"),
+                cns_load_percent=record.get("cns_load"),
+                po2=record.get("po2"),
+                time_to_surface_s=record.get("time_to_surface")
+            )
 
-        movement = Movement(
-            ascent_descent_rate_mps=record.get("ascent_descent_rate")
-        )
+            movement = Movement(
+                ascent_descent_rate_mps=record.get("ascent_descent_rate")
+            )
 
-        quality = MarineNormalizer.calculate_quality(
-            environment,
-            physiology,
-            dive,
-            movement
-        )
+            quality = MarineNormalizer.calculate_quality(
+                environment,
+                physiology,
+                dive,
+                movement
+            )
 
-        return Telemetry(
-            message_id=message_id,
-            timestamp=record.get("timestamp"),
+            return Telemetry(
+                message_id=message_id,
+                timestamp=record.get("timestamp"),
+                
+                device_id=device_id,
+                diver_id=diver_id,
+                dive_id=dive_id,
+
+                environment=environment,
+                physiology=physiology,
+                dive=dive,
+                movement=movement,
+
+                quality=quality
+            )
             
-            device_id=device_id,
-            diver_id=diver_id,
-            dive_id=dive_id,
-
-            environment=environment,
-            physiology=physiology,
-            dive=dive,
-            movement=movement,
-
-            quality=quality
-        )
+        except Exception as error:
+            logger.error(
+                "Failed to normalize telemetry record at timestamp %s: %s",
+                record.get("timestamp"),
+                error
+            )
+            raise
 
     @staticmethod
     def calculate_quality(

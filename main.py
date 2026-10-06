@@ -1,12 +1,17 @@
 import json
 import sys
-from pathlib import Path
+import logging
 
+from pathlib import Path
+from parser.logging_config import configure_logging
 from parser.fit_parser import GarminFitParser
 from parser.normalizer import MarineNormalizer
 from parser.report import DiveReport
 from parser.config import MarineConfig
 from parser.outbox import TelemetryOutbox
+
+configure_logging()
+logger = logging.getLogger("TelemetryStager")
 
 def format_minutes(seconds):
     
@@ -77,7 +82,7 @@ def main():
         f"{dive_id}"
     )
 
-    print("Staging telemetry in durable outbox...")
+    logger.info("Staging telemetry in durable outbox...")
 
     for telemetry in normalized_data:
 
@@ -89,10 +94,7 @@ def main():
             telemetry
         )
 
-    print(
-        f"Telemetry staged in outbox: "
-        f"{len(normalized_data):,} messages"
-    )
+    logger.info("Telemetry staged in outbox: %d messages", len(normalized_data))
 
 # ---------------------------------------------------------
 # DIVE OPERATIONAL REPORT -- SOURCE

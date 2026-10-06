@@ -1,5 +1,7 @@
+import logging
 from statistics import mean
 
+logger = logging.getLogger("DiveReport")
 
 class DiveReport:
 
@@ -113,83 +115,90 @@ class DiveReport:
 
     def generate(self):
 
-        summary = self._get_session_summary()
+        try:
+            summary = self._get_session_summary()
 
-        environment = self.get_environment_summary()
+            environment = self.get_environment_summary()
 
-        heart_rate = self.get_heart_rate_summary()
+            heart_rate = self.get_heart_rate_summary()
 
-        descent_time_ms = summary.get("unknown_15")
-        ascent_time_ms = summary.get("unknown_16")
+            descent_time_ms = summary.get("unknown_15")
+            ascent_time_ms = summary.get("unknown_16")
 
-        descent_time_s = (
-            descent_time_ms / 1000
-            if descent_time_ms is not None
-            else None
-        )
+            descent_time_s = (
+                descent_time_ms / 1000
+                if descent_time_ms is not None
+                else None
+            )
 
-        ascent_time_s = (
-            ascent_time_ms / 1000
-            if ascent_time_ms is not None
-            else None
-        )
+            ascent_time_s = (
+                ascent_time_ms / 1000
+                if ascent_time_ms is not None
+                else None
+            )
 
-        bottom_time_s = summary.get("bottom_time")
+            bottom_time_s = summary.get("bottom_time")
 
-        surface_interval_s = summary.get("surface_interval")
+            surface_interval_s = summary.get("surface_interval")
 
-        return {
+            return {
 
-            "telemetry_records": len(self.telemetry),
+                "telemetry_records": len(self.telemetry),
 
-            "dive_number":
-                summary.get("dive_number"),
+                "dive_number":
+                    summary.get("dive_number"),
 
-            "timestamp":
-                summary.get("timestamp"),
+                "timestamp":
+                    summary.get("timestamp"),
 
-            "average_depth_m":
-                summary.get("avg_depth"),
+                "average_depth_m":
+                    summary.get("avg_depth"),
 
-            "maximum_depth_m":
-                summary.get("max_depth"),
+                "maximum_depth_m":
+                    summary.get("max_depth"),
 
-            "bottom_time_s":
-                bottom_time_s,
+                "bottom_time_s":
+                    bottom_time_s,
 
-            "descent_time_s":
-                descent_time_s,
+                "descent_time_s":
+                    descent_time_s,
 
-            "ascent_time_s":
-                ascent_time_s,
+                "ascent_time_s":
+                    ascent_time_s,
 
-            "surface_interval_s":
-                surface_interval_s,
+                "surface_interval_s":
+                    surface_interval_s,
 
-            "start_n2_percent":
-                summary.get("start_n2"),
+                "start_n2_percent":
+                    summary.get("start_n2"),
 
-            "end_n2_percent":
-                summary.get("end_n2"),
+                "end_n2_percent":
+                    summary.get("end_n2"),
 
-            "start_cns_percent":
-                summary.get("start_cns"),
+                "start_cns_percent":
+                    summary.get("start_cns"),
 
-            "end_cns_percent":
-                summary.get("end_cns"),
+                "end_cns_percent":
+                    summary.get("end_cns"),
 
-            "environment":
-                environment,
+                "environment":
+                    environment,
 
-            "heart_rate":
-                heart_rate,
+                "heart_rate":
+                    heart_rate,
 
-            "events":
-                len(self.events),
+                "events":
+                    len(self.events),
 
-            "dive_settings":
-                self.dive_settings,
+                "dive_settings":
+                    self.dive_settings,
 
-            "dive_gas":
-                self.dive_gas,
-        }
+                "dive_gas":
+                    self.dive_gas,
+            }
+        except Exception as error:
+            logger.error(
+                "Failed to generate dive report: %s",
+                error
+            )
+            raise

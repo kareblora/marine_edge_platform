@@ -59,15 +59,11 @@ try:
 
 except KeyboardInterrupt:
 
-    print(
-        "Stopping Edge Sync Agent..."
-    )
+    logger.info("Stopping Edge Sync Agent...")
 
 finally:
 
     publisher.disconnect()
     outbox.close()
 
-    print(
-        "Edge Sync Agent stopped."
-    )
+    logger.info("Edge Sync Agent stopped.")

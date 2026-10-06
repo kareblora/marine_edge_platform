@@ -1,3 +1,4 @@
+import logging
 import json
 import time
 
@@ -5,6 +6,8 @@ from .metrics import (
     replay_success_total,
     replay_failure_total,
 )
+
+logger = logging.getLogger("ReplayWorker")
 
 class ReplayWorker:
 
@@ -22,9 +25,7 @@ class ReplayWorker:
             if not pending:
                 break
 
-            print(
-                f"Processing batch of {len(pending)} messages."
-            )
+            logger.info("Processing batch of %d messages.", len(pending))
 
             for row in pending:
 
@@ -53,17 +54,14 @@ class ReplayWorker:
                     )
                     replay_failure_total.inc()
 
-                    print(
-                        f"Replay failed: {message_id}"
-                    )
+                    logger.error("Replay failed: %s", message_id)
 
                     # Stop this replay cycle if MQTT
                     # becomes unavailable.
                     return total_replayed
 
-        print(
-            f"Replay complete. "
-            f"Messages replayed: {total_replayed}"
+        logger.info(
+            "Replay complete. Messages replayed: %d", total_replayed
         )
 
         return total_replayed

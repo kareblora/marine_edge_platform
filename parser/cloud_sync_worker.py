@@ -30,7 +30,7 @@ class CloudSyncWorker:
             if not pending:
                 break
 
-            logger.info( "Processing %s pending messages.", len(pending))
+            logger.info( "Processing %d pending messages.", len(pending))
 
             for row in pending:
 
@@ -65,7 +65,7 @@ class CloudSyncWorker:
                     return total_synced
 
         logger.info(
-            "Sync complete. Messages synchronized: %s",
+            "Sync complete. Messages synchronized: %d",
             total_synced
         )
 

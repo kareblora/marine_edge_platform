@@ -1,3 +1,5 @@
+import logging
+
 from parser.config import MarineConfig
 from parser.outbox import TelemetryOutbox
 from parser.cloud_sync_worker import CloudSyncWorker
@@ -5,8 +7,13 @@ from parser.cloud_sync_agent import (
     CloudSyncAgent,
     LocalCloudClient,
 )
+from parser.logging_config import configure_logging
 from parser.metrics import start_metrics_server
 
+
+configure_logging()
+
+logger = logging.getLogger("CloudSyncAgent")
 
 start_metrics_server(8004)
 
@@ -42,14 +49,10 @@ try:
 
 except KeyboardInterrupt:
 
-    print(
-        "Stopping Cloud Sync Agent..."
-    )
+    logger.info("Stopping Cloud Sync Agent...")
 
 finally:
 
     outbox.close()
 
-    print(
-        "Cloud Sync Agent stopped."
-    )
+    logger.info("Cloud Sync Agent stopped.")

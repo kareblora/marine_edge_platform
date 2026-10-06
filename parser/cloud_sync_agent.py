@@ -1,19 +1,14 @@
 import time
 import logging
 
-from .logging_config import configure_logging
-
-configure_logging()
 logger = logging.getLogger("CloudSyncAgent")
+client_logger = logging.getLogger("LocalCloudClient")
 
 
 class LocalCloudClient:
     
     def send(self, message_id, payload):
-        print(
-            f"[CLOUD CLIENT] Sending message: "
-            f"{message_id}"
-        )
+        client_logger.info("Sending message: %s", message_id)
 
         return True
 

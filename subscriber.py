@@ -1,3 +1,7 @@
+import logging
+import threading
+
+from parser.logging_config import configure_logging
 from parser.mqtt_subscriber import MQTTSubscriber
 from parser.config import MarineConfig
 from parser.storage import TelemetryStorage
@@ -8,8 +12,11 @@ from parser.metrics import (
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-import threading
 
+
+configure_logging()
+
+logger = logging.getLogger("SubscriberBootstrap")
 
 class ReadinessHandler(BaseHTTPRequestHandler):
     
@@ -53,17 +60,13 @@ storage = TelemetryStorage(
     telemetry_database
 )
 
-print("[SUBSCRIBER] Starting Marine Edge MQTT Subscriber...")
-print(
-    f"[SUBSCRIBER] MQTT broker: "
-    f"{mqtt_config['broker_host']}:{mqtt_config['broker_port']}"
+logger.info("Starting Marine Edge MQTT Subscriber...")
+logger.info(
+    "MQTT broker: %s:%s", mqtt_config['broker_host'], mqtt_config['broker_port']
 )
-print(
-    f"[SUBSCRIBER] MQTT topic: {topic}"
-)
-print(
-    f"[SUBSCRIBER] Telemetry database: "
-    f"{telemetry_database}"
+logger.info("MQTT topic: %s", topic)
+logger.info(
+    "Telemetry database: %s", telemetry_database
 )
 
 readiness_server = HTTPServer(
@@ -71,9 +74,8 @@ readiness_server = HTTPServer(
     ReadinessHandler
 )
 
-print(
-    "[SUBSCRIBER] Readiness endpoint: "
-    "http://0.0.0.0:8081/health/ready"
+logger.info(
+    "Readiness endpoint: http://0.0.0.0:8081/health/ready"
 )
 
 threading.Thread(
@@ -88,20 +90,20 @@ subscriber = MQTTSubscriber(
     storage
 )
 
-print("[SUBSCRIBER] Starting MQTT subscriber...")
+logger.info("Starting MQTT subscriber...")
 
 try:
     subscriber.start()
 
 except KeyboardInterrupt:
-    print("Stopping subscriber...")
+    logger.info("Stopping subscriber...")
 
 finally:
 
-    print("[SUBSCRIBER] Shutting down readiness server...")
+    logger.info("Shutting down readiness server...")
     readiness_server.shutdown()
 
     storage.close()
 
-    print("[SUBSCRIBER] Database connection closed.")
+    logger.info("Database connection closed.")
 

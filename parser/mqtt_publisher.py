@@ -1,3 +1,4 @@
+import logging
 import json
 import paho.mqtt.client as mqtt
 
@@ -8,6 +9,8 @@ from .metrics import (
     mqtt_publish_success_total,
     mqtt_publish_failure_total,
 )
+
+logger = logging.getLogger("MQTTPublisher")
 
 class MQTTPublisher:
 
@@ -36,7 +39,7 @@ class MQTTPublisher:
         except Exception as error:
             mqtt_publisher_connection_status.set(0)
             mqtt_publisher_connection_failure_total.inc()
-            print(f"MQTT connection failed: {error}")
+            logger.error("MQTT connection failed: %s", error)
             return False
 
     def publish(self, topic, payload):
@@ -64,9 +67,7 @@ class MQTTPublisher:
 
         except Exception as error:
 
-            print(
-                f"MQTT publish failed: {error}"
-            )
+            logger.error("MQTT publish failed: %s", error)
             
             mqtt_publish_failure_total.inc()
             return False

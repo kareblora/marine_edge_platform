@@ -1,3 +1,4 @@
+import logging
 import json
 import paho.mqtt.client as mqtt
 
@@ -9,6 +10,8 @@ from .metrics import (
     telemetry_store_total,
     telemetry_store_failure_total,
 )
+
+logger = logging.getLogger("MQTTSubscriber")
 
 class MQTTSubscriber:
 
@@ -45,8 +48,8 @@ class MQTTSubscriber:
             )
             mqtt_subscriber_ready.set(1)
             
-            print(f"Connected to MQTT broker: {reason_code}")
-            print(f"Subscribe request sent: {self.topic}")
+            logger.info("Connected to MQTT broker: %s", reason_code)
+            logger.info("Subscribe request sent: %s", self.topic)
 
     def on_message(self, client, userdata, message):
         mqtt_receive_total.inc()
@@ -60,30 +63,28 @@ class MQTTSubscriber:
             self.message_count += 1
             telemetry_store_total.inc()
             
-            print(
-                f"Received message #{self.message_count}"
-            )
+            logger.info("Received message #%d", self.message_count)
 
-            print(
-                f"Stored telemetry: "
-                f"{payload.get('timestamp')}"
+            logger.info(
+                "Stored telemetry: %s",
+                payload.get('timestamp')
             )
         
         except Exception as e:
             telemetry_store_failure_total.inc()
-            print(f"Failed to process telemetry: {e}")    
+            logger.error("Failed to process telemetry: %s", e)
 
     def on_subscribe(self, client, userdata, mid, reason_codes, properties):
         mqtt_subscriber_ready.set(1)
 
-        print(f"MQTT subscription confirmed: {reason_codes}")
-        print(f"Subscriber is READY")
+        logger.info("MQTT subscription confirmed: %s", reason_codes)
+        logger.info("Subscriber is READY")
 
     def on_disconnect(self, client, userdata, disconnect_flags, reason_code, properties):
         mqtt_subscriber_connection_status.set(0)
         mqtt_subscriber_ready.set(0)
 
-        print(f"MQTT disconnected: {reason_code}")
+        logger.info("MQTT disconnected: %s", reason_code)
 
     def start(self):
         try:
@@ -98,6 +99,6 @@ class MQTTSubscriber:
         except Exception as e:
             mqtt_subscriber_connection_failure_total.inc()
 
-            print(f"MQTT connection failed: {e}")
+            logger.error("MQTT connection failed: %s", e)
 
 

@@ -1,9 +1,16 @@
+import logging
+
+from parser.logging_config import configure_logging
 from parser.config import MarineConfig
 from parser.outbox import TelemetryOutbox
 from parser.mqtt_publisher import MQTTPublisher
 from parser.sync_agent import EdgeSyncAgent
 from parser.replay_worker import ReplayWorker
 from parser.metrics import start_metrics_server
+
+configure_logging()
+
+logger = logging.getLogger("EdgeSyncBootstrap")
 
 start_metrics_server(8003)
 

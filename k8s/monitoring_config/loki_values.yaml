@@ -28,6 +28,14 @@ singleBinary:
     enabled: true
     size: 2Gi
 
+chunksCache:
+  allocatedMemory: 128
+  allocatedCPU: 100m
+
+resultsCache:
+  allocatedMemory: 64
+  allocatedCPU: 100m
+
 backend:
   replicas: 0
 

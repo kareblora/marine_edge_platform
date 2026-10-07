@@ -1,0 +1,34 @@
+controller:
+  type: deployment
+  replicas: 1
+
+alloy:
+  configMap:
+    create: true
+    content: |
+      discovery.kubernetes "pod" {
+        role = "pod"
+        
+        namespace {
+          nems = ["marine-edge"]
+        }
+      }
+      
+      loki.source.kubernetes "pod_logs" {
+        targets = discovery.kubernetes.pod.targets
+        forward_to = [loki.write.default.receiver]
+      }
+
+      loki.write "default" {
+        endpoint {
+          url = "http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push"
+        }
+      }
+
+resources:
+  requests:
+    cpu: 25m
+    memory: 32Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi

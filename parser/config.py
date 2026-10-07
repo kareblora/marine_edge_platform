@@ -85,3 +85,6 @@ class MarineConfig:
     
     def get_subscriber_config(self):
         return self.config["subscriber"]
+    
+    def get_cloud_config(self):
+        return self.config["cloud"]

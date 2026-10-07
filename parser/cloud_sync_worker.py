@@ -1,11 +1,10 @@
 import logging
-from .logging_config import configure_logging
+
 from .metrics import (
     cloud_sync_success_total,
     cloud_sync_failure_total,
 )
 
-configure_logging()
 logger = logging.getLogger("CloudSyncWorker")
 
 class CloudSyncWorker:

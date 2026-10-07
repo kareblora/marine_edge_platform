@@ -18,5 +18,10 @@
   "storage": {
     "publisher_database": "output/publisher.db",
     "telemetry_database": "output/telemetry.db"
+  },
+
+  "cloud": {
+    "endpoint": "http://cloud-api:8080/telemetry",
+    "timeout": 5
   }
 }

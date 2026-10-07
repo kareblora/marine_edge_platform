@@ -5,7 +5,7 @@ from parser.outbox import TelemetryOutbox
 from parser.cloud_sync_worker import CloudSyncWorker
 from parser.cloud_sync_agent import (
     CloudSyncAgent,
-    LocalCloudClient,
+    HTTPCloudClient,
 )
 from parser.logging_config import configure_logging
 from parser.metrics import start_metrics_server
@@ -31,7 +31,12 @@ outbox = TelemetryOutbox(
     publisher_database
 )
 
-cloud_client = LocalCloudClient()
+cloud_config = config.get_cloud_config()
+
+cloud_client = HTTPCloudClient(
+    endpoint = cloud_config["endpoint"],
+    timeout = cloud_config["timeout"]
+)
 
 cloud_sync_worker = CloudSyncWorker(
     outbox,

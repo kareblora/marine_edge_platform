@@ -1,16 +1,86 @@
-import time
 import logging
+import json
+import urllib.request
+import urllib.error
 
 logger = logging.getLogger("CloudSyncAgent")
-client_logger = logging.getLogger("LocalCloudClient")
+client_logger = logging.getLogger("HTTPCloudClient")
 
 
-class LocalCloudClient:
-    
+class HTTPCloudClient:
+
+    def __init__(self, endpoint, timeout=5):
+        self.endpoint = endpoint
+        self.timeout = timeout
+
     def send(self, message_id, payload):
-        client_logger.info("Sending message: %s", message_id)
 
-        return True
+        client_logger.info(
+            "Sending message %s to %s",
+            message_id,
+            self.endpoint,
+        )
+
+        data = json.dumps({
+            "message_id": message_id,
+            "payload": payload,
+        }).encode("utf-8")
+
+        request = urllib.request.Request(
+            self.endpoint,
+            data=data,
+            headers={
+                "Content-Type": "application/json",
+                "Idempotency-Key": message_id,
+            },
+            method="POST",
+        )
+
+        try:
+
+            with urllib.request.urlopen(
+                request,
+                timeout=self.timeout,
+            ) as response:
+
+                status_code = response.status
+
+                client_logger.info(
+                    "Cloud API response for %s: HTTP %d",
+                    message_id,
+                    status_code,
+                )
+
+                return 200 <= status_code < 300
+
+        except urllib.error.HTTPError as error:
+
+            client_logger.error(
+                "Cloud API returned HTTP %d for message %s",
+                error.code,
+                message_id,
+            )
+
+            return False
+
+        except urllib.error.URLError as error:
+
+            client_logger.error(
+                "Cloud API connection failed for message %s: %s",
+                message_id,
+                error,
+            )
+
+            return False
+
+        except TimeoutError:
+
+            client_logger.error(
+                "Cloud API request timed out for message %s",
+                message_id,
+            )
+
+            return False
 
 class CloudSyncAgent:
 

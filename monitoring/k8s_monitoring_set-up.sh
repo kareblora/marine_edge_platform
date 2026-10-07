@@ -31,3 +31,12 @@ kubectl port-forward \
 helm repo add grafana-community https://grafana-community.github.io/helm-charts
 helm repo update
 helm search repo grafana-community/loki
+
+helm template loki grafana-community/loki \
+  -n monitoring \
+  -f values.yaml > rendered.yaml
+
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo update
+
+helm search repo grafana/alloy

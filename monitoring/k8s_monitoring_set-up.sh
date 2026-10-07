@@ -15,7 +15,6 @@ kubectl get secret \
   marine-monitoring-grafana \
   -o jsonpath="{.data.admin-password}" | base64 -d
 
-
 kubectl port-forward \
   --address 0.0.0.0 \
   -n monitoring \
@@ -27,3 +26,8 @@ kubectl port-forward \
   -n monitoring \
   svc/marine-monitoring-kube-pro-prometheus \
   9090:9090
+
+
+helm repo add grafana-community https://grafana-community.github.io/helm-charts
+helm repo update
+helm search repo grafana-community/loki

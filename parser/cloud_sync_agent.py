@@ -1,7 +1,9 @@
+import time
 import logging
 import json
 import urllib.request
 import urllib.error
+import http.client
 
 logger = logging.getLogger("CloudSyncAgent")
 client_logger = logging.getLogger("HTTPCloudClient")
@@ -69,6 +71,14 @@ class HTTPCloudClient:
                 "Cloud API connection failed for message %s: %s",
                 message_id,
                 error,
+            )
+
+            return False
+
+        except http.client.RemoteDisconnected:
+            client_logger.error(
+                "Cloud API disconnected before responding for message %s",
+                message_id,
             )
 
             return False

@@ -1,3 +1,4 @@
+import sqlite3
 import json
 import logging
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -8,9 +9,48 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger("CloudAPISimulator")
+response_loss_messages = set()
+SIMULATE_RESPONSE_LOSS = True
+DATABASE = "cloud_api.db"
 
+
+
+def initialize_database():
+    connection = sqlite3.connect(DATABASE)
+
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS telemetry (
+            message_id TEXT PRIMARY KEY,
+            payload TEXT NOT NULL,
+            accepted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    connection.commit()
+    connection.close()
+
+def store_telemetry(message_id, payload):
+    connection = sqlite3.connect(DATABASE)
+
+    try:
+        cursor = connection.execute(
+            """
+            INSERT OR IGNORE INTO telemetry (message_id, payload)
+            VALUES (?, ?)
+            """,
+            (message_id, payload),
+        )
+
+        connection.commit()
+
+        return cursor.rowcount == 1
+
+    finally:
+        connection.close()
 
 class CloudAPIHandler(BaseHTTPRequestHandler):
+
+
 
     def do_POST(self):
 
@@ -32,12 +72,39 @@ class CloudAPIHandler(BaseHTTPRequestHandler):
 
             message_id = request_data.get("message_id")
 
-            logger.info(
-                "Received telemetry message: %s",
+            stored = store_telemetry(
                 message_id,
+                request_data.get("payload"),
             )
 
+            if stored:
+                logger.info(
+                    "Accepted telemetry message: %s",
+                    message_id,
+                )
+            else:
+                logger.warning(
+                    "Duplicate telemetry message received: %s",
+                    message_id,
+                )
+
+
+            if (SIMULATE_RESPONSE_LOSS 
+                and stored 
+                and message_id not in response_loss_messages
+            ):
+                response_loss_messages.add(message_id)
+
+                logger.warning(
+                    "Simulating lost response for message %s",
+                    message_id,
+                )
+
+                self.close_connection = True
+                return
+
             self.send_response(200)
+
             self.send_header(
                 "Content-Type",
                 "application/json",
@@ -49,9 +116,16 @@ class CloudAPIHandler(BaseHTTPRequestHandler):
                 "message_id": message_id,
             }
 
-            self.wfile.write(
-                json.dumps(response).encode("utf-8")
-            )
+            try:
+                self.wfile.write(
+                    json.dumps(response).encode("utf-8")
+                )
+           
+            except BrokenPipeError:
+                logger.warning(
+                    "Client disconnected before receiving response for message %s",
+                    message_id,
+                )
 
         except (json.JSONDecodeError, UnicodeDecodeError) as error:
 
@@ -68,6 +142,9 @@ class CloudAPIHandler(BaseHTTPRequestHandler):
 
 
 def run():
+
+    initialize_database()
+    logger.info("Cloud API database initialized: %s", DATABASE)
 
     server = HTTPServer(
         ("0.0.0.0", 8080),

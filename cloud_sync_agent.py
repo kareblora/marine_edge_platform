@@ -35,7 +35,8 @@ cloud_config = config.get_cloud_config()
 
 cloud_client = HTTPCloudClient(
     endpoint = cloud_config["endpoint"],
-    timeout = cloud_config["timeout"]
+    timeout = cloud_config["timeout"],
+    region = cloud_config["region"],
 )
 
 cloud_sync_worker = CloudSyncWorker(

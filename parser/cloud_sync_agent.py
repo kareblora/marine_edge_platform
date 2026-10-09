@@ -5,15 +5,23 @@ import urllib.request
 import urllib.error
 import http.client
 
+import boto3
+from botocore.auth import SigV4Auth
+from botocore.awsrequest import AWSRequest
+from botocore.exceptions import NoCredentialsError, BotoCoreError
+
 logger = logging.getLogger("CloudSyncAgent")
 client_logger = logging.getLogger("HTTPCloudClient")
 
 
 class HTTPCloudClient:
 
-    def __init__(self, endpoint, timeout=5):
+    def __init__(self, endpoint, timeout=5, region="us-east-1"):
         self.endpoint = endpoint
         self.timeout = timeout
+        self.region = region
+        self.session = boto3.Session()
+        self.credentials = self.session.get_credentials()
 
     def send(self, message_id, payload):
 
@@ -28,15 +36,39 @@ class HTTPCloudClient:
             "payload": payload,
         }).encode("utf-8")
 
-        request = urllib.request.Request(
-            self.endpoint,
+        if self.credentials is None:
+            client_logger.error("No AWS credentials available for SigV4 signing")
+            return False
+
+        aws_request = AWSRequest(
+            method="POST",
+            url=self.endpoint,
             data=data,
             headers={
                 "Content-Type": "application/json",
                 "Idempotency-Key": message_id,
             },
-            method="POST",
         )
+
+        try:
+            credentials = self.credentials.get_frozen_credentials()
+
+            SigV4Auth(
+                credentials,
+                "execute-api",
+                self.region,
+            ).add_auth(aws_request)
+
+            request = urllib.request.Request(
+                self.endpoint,
+                data=data,
+                headers=dict(aws_request.headers.items()),
+                method="POST",
+            )
+
+        except (NoCredentialsError, BotoCoreError):
+            client_logger.exception("Unable to sign cloud API request")
+            return False
 
         try:
 

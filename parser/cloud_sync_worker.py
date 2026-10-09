@@ -1,4 +1,5 @@
 import logging
+import json
 
 from .metrics import (
     cloud_sync_success_total,
@@ -35,6 +36,9 @@ class CloudSyncWorker:
 
                 message_id = row[0]
                 payload = row[1]
+
+                if isinstance(payload, str):
+                    payload = json.loads(payload)
 
                 success = self.cloud_client.send(
                     message_id,

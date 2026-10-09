@@ -89,10 +89,13 @@ class HTTPCloudClient:
 
         except urllib.error.HTTPError as error:
 
+            response_body = error.read().decode("utf-8", errors="replace")
+
             client_logger.error(
-                "Cloud API returned HTTP %d for message %s",
+                    "Cloud API returned HTTP %d for message %s. Response: %s",
                 error.code,
                 message_id,
+                response_body,
             )
 
             return False

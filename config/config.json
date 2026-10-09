@@ -24,6 +24,7 @@
     "endpoint": "https://cl4xqg6hij.execute-api.us-east-1.amazonaws.com/telemetry",
     "region": "us-east-1",
     "retry_interval_seconds": 10,
-    "timeout": 5
+    "timeout": 5,
+    "batch_size": 10
   }
 }

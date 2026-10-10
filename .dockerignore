@@ -5,3 +5,18 @@ __pycache__/
 .gitignore
 output/*.db
 output/*.sqlite
+
+# Local credentials and sensitive files
+.aws/
+password.txt
+.env
+.env.*
+
+# Local archives and temporary databases
+*.tar
+*.db
+*.sqlite
+*.sqlite3
+
+# Local test artifacts
+/tmp/

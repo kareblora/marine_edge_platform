@@ -15,8 +15,23 @@ spec:
     spec:
       containers:
         - name: cloud-sync-agent
-          image: marine-cloud-sync-agent:1.0
+          image: marine-cloud-sync-agent:1.1
           imagePullPolicy: IfNotPresent
+          env:
+            - name: MARINE_CLOUD_SIMULATION
+              value: "0"
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: marine-edge-aws-credentials
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: marine-edge-aws-credentials
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_DEFAULT_REGION
+              value: us-east-1
           ports:
             - name: metrics
               containerPort: 8004
